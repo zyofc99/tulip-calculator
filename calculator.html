@@ -275,6 +275,15 @@
       try { const n=parseInt(eval(display.value)); if(n<0||n>170) throw new Error(); let r=1; for(let i=2;i<=n;i++) r*=i; display.value=r; }
       catch { display.value='錯誤'; }
     }
+
+    // ✅ Service Worker 註冊
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./service-worker.js')
+          .then(reg => console.log('✅ Service Worker 註冊成功', reg))
+          .catch(err => console.log('❌ Service Worker 註冊失敗', err));
+      });
+    }
   </script>
 </body>
 </html>
