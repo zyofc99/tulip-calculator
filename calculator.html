@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>鬱金香計算機</title>
- <link rel="manifest" href="./manifest.json">
+  <link rel="manifest" href="./manifest.json">
   <link rel="icon" id="favicon" type="image/svg+xml">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap');
@@ -55,7 +55,6 @@
     .tulip-field{position:fixed;bottom:0;left:0;width:100%;height:22%;z-index:4;pointer-events:none;}
     .tulip-field svg{width:100%;height:100%;}
 
-    /* 計算機 */
     #calculator {
       position:relative; z-index:10;
       background:rgba(255,253,231,0.90);
@@ -103,17 +102,11 @@
     button:hover{transform:translateY(-2px);filter:brightness(1.08);}
     button:active{transform:translateY(1px);}
 
-    /* 數字鍵 - 淡黃 */
     .key-num  {background:linear-gradient(145deg,#fffde7,#fff9c4);color:#5d3a00;box-shadow:0 3px 8px rgba(249,168,37,0.2),inset 0 1px 0 rgba(255,255,255,0.9);border:1px solid rgba(255,224,130,0.6);}
-    /* 運算鍵 - 天空藍 */
     .key-op   {background:linear-gradient(145deg,#e3f2fd,#bbdefb);color:#0d47a1;box-shadow:0 3px 8px rgba(33,150,243,0.15),inset 0 1px 0 rgba(255,255,255,0.8);border:1px solid rgba(100,181,246,0.4);}
-    /* 功能鍵 - 金黃 */
     .key-fn   {background:linear-gradient(145deg,#fff8e1,#ffecb3);color:#e65100;box-shadow:0 3px 8px rgba(255,152,0,0.18),inset 0 1px 0 rgba(255,255,255,0.8);border:1px solid rgba(255,213,79,0.6);}
-    /* 三角函數鍵 - 橘黃 */
     .key-trig {background:linear-gradient(145deg,#fff3e0,#ffe0b2);color:#bf360c;box-shadow:0 3px 8px rgba(255,111,0,0.15),inset 0 1px 0 rgba(255,255,255,0.8);border:1px solid rgba(255,183,77,0.5);}
-    /* 清除鍵 */
     #clear {background:linear-gradient(145deg,#ffebee,#ffcdd2);color:#b71c1c;box-shadow:0 3px 8px rgba(244,67,54,0.2),inset 0 1px 0 rgba(255,255,255,0.8);border:1px solid rgba(239,154,154,0.5);font-size:11px;}
-    /* 等號鍵 - 深金黃 */
     #equals {background:linear-gradient(145deg,#f9a825,#e65100);color:#fffde7;font-size:15px;font-weight:700;box-shadow:0 4px 14px rgba(230,81,0,0.4),inset 0 1px 0 rgba(255,255,255,0.2);border:1px solid rgba(255,183,77,0.4);text-shadow:0 1px 2px rgba(0,0,0,0.2);}
     #equals:hover{background:linear-gradient(145deg,#ffb300,#f57c00);box-shadow:0 6px 18px rgba(230,81,0,0.55);}
 
@@ -163,7 +156,6 @@
     </svg>
   </div>
 
-  <!-- 黃色鬱金香田 -->
   <div class="tulip-field">
     <svg viewBox="0 0 1200 180" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
       <rect x="0" y="100" width="1200" height="80" fill="#3a7a3a"/>
@@ -231,7 +223,6 @@
   </div>
 
   <script>
-    // ── 內嵌黃色鬱金香 SVG favicon ──
     const tulipSVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
       <circle cx="96" cy="96" r="96" fill="#fffde7"/>
       <circle cx="96" cy="96" r="90" fill="none" stroke="#fff176" stroke-width="4"/>
@@ -249,7 +240,6 @@
     const svgBlob = new Blob([tulipSVG], {type:'image/svg+xml'});
     document.getElementById('favicon').href = URL.createObjectURL(svgBlob);
 
-    // ── 落花效果（黃色系） ──
     const petalsEmoji = ['🌷','🌼','🌻','✨','🌾'];
     const petalContainer = document.getElementById('petals-container');
     function createPetal() {
@@ -266,7 +256,6 @@
     for (let i = 0; i < 10; i++) setTimeout(createPetal, i*1000);
     setInterval(createPetal, 1800);
 
-    // ── 計算機邏輯 ──
     const display = document.getElementById('display');
     function appendToDisplay(v) { if(display.value==='錯誤') display.value=''; display.value+=v; }
     function clearDisplay()     { display.value=''; }
