@@ -82,6 +82,7 @@
       font-size:42px; font-weight:700; text-align:right;
       text-shadow:0 1px 3px rgba(180,120,0,0.2);
       caret-color:#f9a825; line-height:1.1;
+      text-overflow: clip;
     }
     #display::placeholder{color:#ffe082;}
 
@@ -257,23 +258,44 @@
     setInterval(createPetal, 1800);
 
     const display = document.getElementById('display');
-    function appendToDisplay(v) { if(display.value==='錯誤') display.value=''; display.value+=v; }
-    function clearDisplay()     { display.value=''; }
-    function backspace()        { display.value=display.value.slice(0,-1); }
-    function calculate() {
-      try { let e=display.value.replace(/×/g,'*').replace(/÷/g,'/').replace(/−/g,'-'); display.value=parseFloat(eval(e).toPrecision(10)); }
-      catch { display.value='錯誤'; }
+
+    // 捲動到最右邊的輔助函式
+    function scrollToEnd() {
+      display.scrollLeft = display.scrollWidth;
     }
-    function sqrt()      { try{display.value=parseFloat(Math.sqrt(eval(display.value)).toPrecision(10));}catch{display.value='錯誤';} }
-    function power()     { appendToDisplay('**'); }
-    function doLog()     { try{display.value=parseFloat(Math.log10(eval(display.value)).toPrecision(10));}catch{display.value='錯誤';} }
-    function ln()        { try{display.value=parseFloat(Math.log(eval(display.value)).toPrecision(10));}catch{display.value='錯誤';} }
-    function doSin()     { try{display.value=parseFloat(Math.sin(eval(display.value)).toPrecision(10));}catch{display.value='錯誤';} }
-    function doCos()     { try{display.value=parseFloat(Math.cos(eval(display.value)).toPrecision(10));}catch{display.value='錯誤';} }
-    function doTan()     { try{display.value=parseFloat(Math.tan(eval(display.value)).toPrecision(10));}catch{display.value='錯誤';} }
+
+    function appendToDisplay(v) {
+      if(display.value==='錯誤') display.value='';
+      display.value += v;
+      scrollToEnd(); // ← 每次輸入後捲到最右邊
+    }
+    function clearDisplay()  { display.value=''; }
+    function backspace()     {
+      display.value = display.value.slice(0,-1);
+      scrollToEnd();
+    }
+    function calculate() {
+      try {
+        let e = display.value.replace(/×/g,'*').replace(/÷/g,'/').replace(/−/g,'-');
+        display.value = parseFloat(eval(e).toPrecision(10));
+        scrollToEnd();
+      } catch { display.value='錯誤'; }
+    }
+    function sqrt()  { try{display.value=parseFloat(Math.sqrt(eval(display.value)).toPrecision(10));scrollToEnd();}catch{display.value='錯誤';} }
+    function power() { appendToDisplay('**'); }
+    function doLog() { try{display.value=parseFloat(Math.log10(eval(display.value)).toPrecision(10));scrollToEnd();}catch{display.value='錯誤';} }
+    function ln()    { try{display.value=parseFloat(Math.log(eval(display.value)).toPrecision(10));scrollToEnd();}catch{display.value='錯誤';} }
+    function doSin() { try{display.value=parseFloat(Math.sin(eval(display.value)).toPrecision(10));scrollToEnd();}catch{display.value='錯誤';} }
+    function doCos() { try{display.value=parseFloat(Math.cos(eval(display.value)).toPrecision(10));scrollToEnd();}catch{display.value='錯誤';} }
+    function doTan() { try{display.value=parseFloat(Math.tan(eval(display.value)).toPrecision(10));scrollToEnd();}catch{display.value='錯誤';} }
     function factorial() {
-      try { const n=parseInt(eval(display.value)); if(n<0||n>170) throw new Error(); let r=1; for(let i=2;i<=n;i++) r*=i; display.value=r; }
-      catch { display.value='錯誤'; }
+      try {
+        const n=parseInt(eval(display.value));
+        if(n<0||n>170) throw new Error();
+        let r=1; for(let i=2;i<=n;i++) r*=i;
+        display.value=r;
+        scrollToEnd();
+      } catch { display.value='錯誤'; }
     }
 
     // ✅ Service Worker 註冊
