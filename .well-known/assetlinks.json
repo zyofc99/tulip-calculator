@@ -4,7 +4,7 @@
     "target": {
       "namespace": "android_app",
       "package_name": "io.github.zyofc99.twa",
-      "sha256_cert_fingerprints": ["7E:69:EC:D0:8D:53:7B:14:00:92:76:5E:39:2A:C3:A2:22:EE:EA:25:50:70:19:65:46:1B:D5:70:8D:2B:91:31"]
+      "sha256_cert_fingerprints": ["FE:6C:EC:C2:4E:99:3D:1F:FA:6E:FA:07:74:82:FF:90:71:80:02:60:33:6D:1F:1D:D9:77:F7:5B:10:D7:9F:C4"]
     }
   },
   {
