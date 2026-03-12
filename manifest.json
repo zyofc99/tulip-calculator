@@ -13,31 +13,22 @@
   "categories": ["utilities", "productivity"],
   "icons": [
     {
-      "src": "/tulip-calculator/icons/icon-192x192.png",
+      "src": "icon-192x192.png",
       "sizes": "72x72 96x96 128x128 144x144 152x152 192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/tulip-calculator/icons/icon-512x512.png",
+      "src": "icon-512x512.png",
       "sizes": "384x384 512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/tulip-calculator/icons/icon-512x512.png",
+      "src": "icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "/tulip-calculator/screenshots/screen1.png",
-      "sizes": "390x844",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "鬱金香計算機主畫面"
     }
   ],
   "prefer_related_applications": false
