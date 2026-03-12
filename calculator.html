@@ -4,8 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>鬱金香計算機</title>
-  <link rel="manifest" href="./manifest.json">
-  <link rel="icon" id="favicon" type="image/svg+xml">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap');
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -20,8 +18,8 @@
       position: relative;
     }
     .sun {
-      position: fixed; width:90px; height:90px;
-      background: radial-gradient(circle,#fff9c4 0%,#ffe066 40%,#ffaa00 70%,transparent 100%);
+      position:fixed; width:90px; height:90px;
+      background:radial-gradient(circle,#fff9c4 0%,#ffe066 40%,#ffaa00 70%,transparent 100%);
       border-radius:50%; top:7%; right:16%;
       box-shadow:0 0 40px #ffe066,0 0 80px #ffcc0066;
       animation:sun-glow 4s ease-in-out infinite alternate; z-index:1;
@@ -66,6 +64,21 @@
     .calc-title { text-align:center;font-size:18px;font-weight:700;color:#e65100;letter-spacing:3px;margin-bottom:2px;text-shadow:0 1px 3px rgba(255,255,255,0.9); }
     .calc-subtitle { text-align:center;font-size:9px;color:#f9a825;letter-spacing:4px;margin-bottom:12px; }
 
+    /* ══ Tab ══ */
+    .tab-bar{display:flex;gap:6px;margin-bottom:12px;}
+    .tab-btn{
+      flex:1;padding:7px 4px;border:1.5px solid rgba(255,213,79,0.6);
+      border-radius:10px;font-family:'Quicksand',sans-serif;
+      font-size:12px;font-weight:700;cursor:pointer;
+      background:rgba(255,249,196,0.5);color:#a0522d;transition:all 0.2s;
+    }
+    .tab-btn.active{
+      background:linear-gradient(145deg,#f9a825,#e65100);
+      color:#fffde7;border-color:#e65100;
+      box-shadow:0 3px 10px rgba(230,81,0,0.3);
+    }
+
+    /* ══ 計算機面板 ══ */
     #display-wrapper {
       background:linear-gradient(135deg,rgba(255,249,196,0.8),rgba(255,236,153,0.6));
       border:1.5px solid rgba(249,168,37,0.4); border-radius:14px;
@@ -82,15 +95,15 @@
       font-size:42px; font-weight:700; text-align:right;
       text-shadow:0 1px 3px rgba(180,120,0,0.2);
       caret-color:#f9a825; line-height:1.1;
-      text-overflow: clip;
+      text-overflow:clip; white-space:nowrap; overflow:hidden;
     }
     #display::placeholder{color:#ffe082;}
 
-    #buttons { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; }
+    #buttons { display:grid; grid-template-columns:repeat(4,1fr); gap:7px; }
     button {
-      padding:13px 3px; font-family:'Quicksand','Noto Sans TC',sans-serif;
-      font-size:13px; font-weight:700; border:none; cursor:pointer;
-      border-radius:11px; transition:all 0.15s ease;
+      padding:17px 3px; font-family:'Quicksand','Noto Sans TC',sans-serif;
+      font-size:15px; font-weight:700; border:none; cursor:pointer;
+      border-radius:13px; transition:all 0.15s ease;
       position:relative; overflow:hidden; letter-spacing:0.3px;
     }
     button::after {
@@ -99,17 +112,115 @@
       border-radius:50%; transform:translate(-50%,-50%);
       transition:width 0.3s,height 0.3s,opacity 0.3s; opacity:0;
     }
-    button:active::after{width:110px;height:110px;opacity:1;}
+    button:active::after{width:120px;height:120px;opacity:1;}
     button:hover{transform:translateY(-2px);filter:brightness(1.08);}
     button:active{transform:translateY(1px);}
-
     .key-num  {background:linear-gradient(145deg,#fffde7,#fff9c4);color:#5d3a00;box-shadow:0 3px 8px rgba(249,168,37,0.2),inset 0 1px 0 rgba(255,255,255,0.9);border:1px solid rgba(255,224,130,0.6);}
     .key-op   {background:linear-gradient(145deg,#e3f2fd,#bbdefb);color:#0d47a1;box-shadow:0 3px 8px rgba(33,150,243,0.15),inset 0 1px 0 rgba(255,255,255,0.8);border:1px solid rgba(100,181,246,0.4);}
     .key-fn   {background:linear-gradient(145deg,#fff8e1,#ffecb3);color:#e65100;box-shadow:0 3px 8px rgba(255,152,0,0.18),inset 0 1px 0 rgba(255,255,255,0.8);border:1px solid rgba(255,213,79,0.6);}
-    .key-trig {background:linear-gradient(145deg,#fff3e0,#ffe0b2);color:#bf360c;box-shadow:0 3px 8px rgba(255,111,0,0.15),inset 0 1px 0 rgba(255,255,255,0.8);border:1px solid rgba(255,183,77,0.5);}
-    #clear {background:linear-gradient(145deg,#ffebee,#ffcdd2);color:#b71c1c;box-shadow:0 3px 8px rgba(244,67,54,0.2),inset 0 1px 0 rgba(255,255,255,0.8);border:1px solid rgba(239,154,154,0.5);font-size:11px;}
-    #equals {background:linear-gradient(145deg,#f9a825,#e65100);color:#fffde7;font-size:15px;font-weight:700;box-shadow:0 4px 14px rgba(230,81,0,0.4),inset 0 1px 0 rgba(255,255,255,0.2);border:1px solid rgba(255,183,77,0.4);text-shadow:0 1px 2px rgba(0,0,0,0.2);}
+    #clear    {background:linear-gradient(145deg,#ffebee,#ffcdd2);color:#b71c1c;box-shadow:0 3px 8px rgba(244,67,54,0.2),inset 0 1px 0 rgba(255,255,255,0.8);border:1px solid rgba(239,154,154,0.5);font-size:13px;}
+    #backspace{background:linear-gradient(145deg,#e3f2fd,#bbdefb);color:#0d47a1;box-shadow:0 3px 8px rgba(33,150,243,0.15),inset 0 1px 0 rgba(255,255,255,0.8);border:1px solid rgba(100,181,246,0.4);font-size:13px;}
+    #equals   {background:linear-gradient(145deg,#f9a825,#e65100);color:#fffde7;font-size:15px;font-weight:700;
+               box-shadow:0 4px 14px rgba(230,81,0,0.4),inset 0 1px 0 rgba(255,255,255,0.2);
+               border:1px solid rgba(255,183,77,0.4);text-shadow:0 1px 2px rgba(0,0,0,0.2);
+               grid-column:span 4;}
     #equals:hover{background:linear-gradient(145deg,#ffb300,#f57c00);box-shadow:0 6px 18px rgba(230,81,0,0.55);}
+
+    #fx-panel{display:none;}
+    #fx-panel.active{display:block;}
+    #calc-panel.hidden{display:none;}
+
+    /* ══ 匯率面板 ══ */
+    .fx-rate-bar{
+      background:linear-gradient(135deg,rgba(255,249,196,0.8),rgba(255,236,153,0.6));
+      border:1.5px solid rgba(249,168,37,0.4);border-radius:12px;
+      padding:7px 12px;margin-bottom:10px;font-size:10px;color:#a0522d;
+      display:flex;justify-content:space-between;flex-wrap:wrap;gap:3px;
+    }
+    .fx-rate-bar span{font-weight:700;color:#e65100;}
+    .fx-rate-bar .rate-update{font-size:9px;color:#bbb;width:100%;text-align:right;}
+    .fx-loading{text-align:center;font-size:11px;color:#e65100;animation:blink 1s ease-in-out infinite;}
+    @keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}
+
+    .fx-pair-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+    .fx-pair-btn{
+      padding:8px 6px;border-radius:12px;border:2px solid rgba(255,213,79,0.5);
+      background:rgba(255,249,196,0.5);color:#a0522d;
+      font-family:'Quicksand',sans-serif;font-size:11px;font-weight:700;
+      cursor:pointer;transition:all 0.2s;text-align:center;line-height:1.4;
+    }
+    .fx-pair-btn .flag{font-size:16px;display:block;margin-bottom:1px;}
+    .fx-pair-btn.selected{
+      background:linear-gradient(145deg,#f9a825,#e65100);
+      color:#fffde7;border-color:#e65100;
+      box-shadow:0 3px 10px rgba(230,81,0,0.3);
+    }
+    .fx-pair-btn:hover{transform:translateY(-2px);filter:brightness(1.05);}
+
+    .fx-display-box{
+      background:linear-gradient(135deg,rgba(255,249,196,0.8),rgba(255,236,153,0.6));
+      border:1.5px solid rgba(249,168,37,0.4);border-radius:14px;
+      padding:10px 14px;margin-bottom:6px;position:relative;overflow:hidden;
+    }
+    .fx-display-box::before{content:'🌷';position:absolute;left:10px;top:8px;font-size:14px;opacity:0.35;}
+    .fx-display-label{font-size:9px;color:#e65100;letter-spacing:2px;margin-bottom:3px;text-align:right;}
+    .fx-display-row{display:flex;align-items:center;gap:8px;justify-content:flex-end;}
+    .fx-currency-tag{
+      background:linear-gradient(145deg,#f9a825,#e65100);
+      color:#fffde7;border-radius:8px;padding:3px 9px;
+      font-size:12px;font-weight:700;white-space:nowrap;
+      box-shadow:0 2px 6px rgba(230,81,0,0.3);flex-shrink:0;
+    }
+    #fx-display-val{
+      font-size:34px;font-weight:700;color:#5d3a00;
+      font-family:'Quicksand',sans-serif;text-align:right;
+      min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+    }
+    .fx-arrow{text-align:center;font-size:18px;margin:3px 0;color:#e65100;
+      animation:bounce-arrow 1.5s ease-in-out infinite;}
+    @keyframes bounce-arrow{0%,100%{transform:translateY(0);}50%{transform:translateY(3px);}}
+
+    .fx-result-box{
+      background:linear-gradient(135deg,rgba(230,81,0,0.07),rgba(249,168,37,0.12));
+      border:1.5px solid rgba(249,168,37,0.5);border-radius:14px;
+      padding:10px 14px;margin-bottom:10px;position:relative;overflow:hidden;
+    }
+    .fx-result-box::before{content:'🌷';position:absolute;right:10px;top:8px;font-size:14px;opacity:0.3;}
+    .fx-result-label{font-size:9px;color:#e65100;letter-spacing:2px;margin-bottom:3px;text-align:right;}
+    .fx-result-row{display:flex;align-items:center;gap:8px;justify-content:flex-end;}
+    .fx-result-tag{
+      background:linear-gradient(145deg,#e3f2fd,#bbdefb);
+      color:#0d47a1;border-radius:8px;padding:3px 9px;
+      font-size:12px;font-weight:700;white-space:nowrap;
+      box-shadow:0 2px 6px rgba(33,150,243,0.2);flex-shrink:0;
+    }
+    #fx-result{
+      font-size:34px;font-weight:700;color:#5d3a00;
+      font-family:'Quicksand',sans-serif;text-align:right;
+      min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+    }
+
+    .fx-numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
+    .fx-key{
+      padding:13px 4px;font-family:'Quicksand',sans-serif;
+      font-size:14px;font-weight:700;border:none;cursor:pointer;
+      border-radius:11px;transition:all 0.15s ease;
+      position:relative;overflow:hidden;
+    }
+    .fx-key:hover{transform:translateY(-2px);filter:brightness(1.08);}
+    .fx-key:active{transform:translateY(1px);}
+    .fx-key::after{
+      content:'';position:absolute;top:50%;left:50%;
+      width:0;height:0;background:rgba(255,255,255,0.5);
+      border-radius:50%;transform:translate(-50%,-50%);
+      transition:width 0.3s,height 0.3s,opacity 0.3s;opacity:0;
+    }
+    .fx-key:active::after{width:100px;height:100px;opacity:1;}
+    .fx-num{background:linear-gradient(145deg,#fffde7,#fff9c4);color:#5d3a00;box-shadow:0 3px 8px rgba(249,168,37,0.2),inset 0 1px 0 rgba(255,255,255,0.9);border:1px solid rgba(255,224,130,0.6);}
+    .fx-del{background:linear-gradient(145deg,#fce4ec,#f8bbd0);color:#880e4f;box-shadow:0 3px 8px rgba(233,30,99,0.15);border:1px solid rgba(244,143,177,0.5);}
+    .fx-clr{background:linear-gradient(145deg,#ffebee,#ffcdd2);color:#b71c1c;box-shadow:0 3px 8px rgba(244,67,54,0.2);border:1px solid rgba(239,154,154,0.5);}
+    .fx-dot{background:linear-gradient(145deg,#fffde7,#fff9c4);color:#5d3a00;box-shadow:0 3px 8px rgba(249,168,37,0.2);border:1px solid rgba(255,224,130,0.6);}
+    .fx-full{grid-column:span 3;}
 
     .footer-deco{text-align:center;margin-top:12px;font-size:18px;letter-spacing:5px;opacity:0.6;}
     .petal{position:fixed;pointer-events:none;z-index:5;animation:petal-fall linear infinite;opacity:0.85;font-size:14px;}
@@ -123,7 +234,6 @@
   </style>
 </head>
 <body>
-
   <div class="sun"></div>
   <div class="cloud cloud-1"></div>
   <div class="cloud cloud-2"></div>
@@ -143,7 +253,6 @@
       <polygon points="1070,45 1080,28 1090,45" fill="rgba(255,255,255,0.6)"/>
     </svg>
   </div>
-
   <div class="trees">
     <svg viewBox="0 0 1200 200" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
       <rect x="0" y="120" width="1200" height="80" fill="#2d5a2d"/>
@@ -156,7 +265,6 @@
       </g>
     </svg>
   </div>
-
   <div class="tulip-field">
     <svg viewBox="0 0 1200 180" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
       <rect x="0" y="100" width="1200" height="80" fill="#3a7a3a"/>
@@ -179,68 +287,109 @@
   <div id="calculator">
     <div class="calc-title">🌷 鬱金香計算機 🌷</div>
     <div class="calc-subtitle">✦ 數字與花香的和諧 ✦</div>
-    <div id="display-wrapper">
-      <div class="display-label">輸入算式</div>
-      <input type="text" id="display" placeholder="0" readonly>
+
+    <div class="tab-bar">
+      <button class="tab-btn active" id="tab-calc" onclick="switchTab('calc')">🔢 計算機</button>
+      <button class="tab-btn" id="tab-fx" onclick="switchTab('fx')">💱 匯率換算</button>
     </div>
-    <div id="buttons">
-      <button class="key-num" onclick="appendToDisplay('(')">(</button>
-      <button class="key-num" onclick="appendToDisplay(')')">)</button>
-      <button id="clear"  onclick="clearDisplay()">🌷 清除</button>
-      <button class="key-op" onclick="backspace()">⌫ 退格</button>
-      <button class="key-op" onclick="appendToDisplay('/')">÷</button>
 
-      <button class="key-num" onclick="appendToDisplay('7')">7</button>
-      <button class="key-num" onclick="appendToDisplay('8')">8</button>
-      <button class="key-num" onclick="appendToDisplay('9')">9</button>
-      <button class="key-op" onclick="appendToDisplay('*')">×</button>
-      <button class="key-fn" onclick="power()">xʸ</button>
+    <!-- ══ 計算機面板 ══ -->
+    <div id="calc-panel">
+      <div id="display-wrapper">
+        <div class="display-label">輸入算式</div>
+        <input type="text" id="display" placeholder="0" readonly>
+      </div>
+      <div id="buttons">
+        <button class="key-num" onclick="appendToDisplay('(')">(</button>
+        <button class="key-num" onclick="appendToDisplay(')')">)</button>
+        <button id="clear"     onclick="clearDisplay()">🌷 清除</button>
+        <button id="backspace" onclick="backspace()">⌫ 退格</button>
 
-      <button class="key-num" onclick="appendToDisplay('4')">4</button>
-      <button class="key-num" onclick="appendToDisplay('5')">5</button>
-      <button class="key-num" onclick="appendToDisplay('6')">6</button>
-      <button class="key-op" onclick="appendToDisplay('-')">−</button>
-      <button class="key-fn" onclick="sqrt()">√x</button>
+        <button class="key-num" onclick="appendToDisplay('7')">7</button>
+        <button class="key-num" onclick="appendToDisplay('8')">8</button>
+        <button class="key-num" onclick="appendToDisplay('9')">9</button>
+        <button class="key-op"  onclick="appendToDisplay('/')">÷</button>
 
-      <button class="key-num" onclick="appendToDisplay('1')">1</button>
-      <button class="key-num" onclick="appendToDisplay('2')">2</button>
-      <button class="key-num" onclick="appendToDisplay('3')">3</button>
-      <button class="key-op" onclick="appendToDisplay('+')">+</button>
-      <button class="key-fn" onclick="doLog()">log</button>
+        <button class="key-num" onclick="appendToDisplay('4')">4</button>
+        <button class="key-num" onclick="appendToDisplay('5')">5</button>
+        <button class="key-num" onclick="appendToDisplay('6')">6</button>
+        <button class="key-op"  onclick="appendToDisplay('*')">×</button>
 
-      <button class="key-num" onclick="appendToDisplay('0')">0</button>
-      <button class="key-num" onclick="appendToDisplay('.')">.</button>
-      <button class="key-fn" onclick="appendToDisplay(Math.E.toFixed(5))">e</button>
-      <button class="key-fn" onclick="appendToDisplay(Math.PI.toFixed(5))">π</button>
-      <button class="key-fn" onclick="ln()">ln</button>
+        <button class="key-num" onclick="appendToDisplay('1')">1</button>
+        <button class="key-num" onclick="appendToDisplay('2')">2</button>
+        <button class="key-num" onclick="appendToDisplay('3')">3</button>
+        <button class="key-op"  onclick="appendToDisplay('-')">−</button>
 
-      <button class="key-trig" onclick="doSin()">sin</button>
-      <button class="key-trig" onclick="doCos()">cos</button>
-      <button class="key-trig" onclick="doTan()">tan</button>
-      <button class="key-fn"   onclick="factorial()">n!</button>
-      <button id="equals" onclick="calculate()">🌷 =</button>
+        <button class="key-fn"  onclick="toggleSign()">±</button>
+        <button class="key-num" onclick="appendToDisplay('0')">0</button>
+        <button class="key-num" onclick="appendToDisplay('.')">.</button>
+        <button class="key-op"  onclick="appendToDisplay('+')">+</button>
+
+        <button id="equals" onclick="calculate()">🌷 =</button>
+      </div>
     </div>
+
+    <!-- ══ 匯率換算面板 ══ -->
+    <div id="fx-panel">
+      <div class="fx-rate-bar" id="fx-rate-bar">
+        <div class="fx-loading" style="width:100%;text-align:center;">🌷 匯率載入中...</div>
+      </div>
+
+      <div class="fx-pair-grid">
+        <button class="fx-pair-btn selected" onclick="selectPair('TWD','JPY')" id="btn-twd-jpy">
+          <span class="flag">🇹🇼→🇯🇵</span>台幣 → 日幣
+        </button>
+        <button class="fx-pair-btn" onclick="selectPair('JPY','TWD')" id="btn-jpy-twd">
+          <span class="flag">🇯🇵→🇹🇼</span>日幣 → 台幣
+        </button>
+        <button class="fx-pair-btn" onclick="selectPair('TWD','USD')" id="btn-twd-usd">
+          <span class="flag">🇹🇼→🇺🇸</span>台幣 → 美元
+        </button>
+        <button class="fx-pair-btn" onclick="selectPair('USD','TWD')" id="btn-usd-twd">
+          <span class="flag">🇺🇸→🇹🇼</span>美元 → 台幣
+        </button>
+      </div>
+
+      <div class="fx-display-box">
+        <div class="fx-display-label">✦ 輸入金額 ✦</div>
+        <div class="fx-display-row">
+          <div class="fx-currency-tag" id="fx-from-tag">TWD</div>
+          <div id="fx-display-val">0</div>
+        </div>
+      </div>
+
+      <div class="fx-arrow">⬇️</div>
+
+      <div class="fx-result-box">
+        <div class="fx-result-label">✦ 換算結果 ✦</div>
+        <div class="fx-result-row">
+          <div class="fx-result-tag" id="fx-to-tag">JPY</div>
+          <div id="fx-result">—</div>
+        </div>
+      </div>
+
+      <div class="fx-numpad">
+        <button class="fx-key fx-num" onclick="fxKey('7')">7</button>
+        <button class="fx-key fx-num" onclick="fxKey('8')">8</button>
+        <button class="fx-key fx-num" onclick="fxKey('9')">9</button>
+        <button class="fx-key fx-num" onclick="fxKey('4')">4</button>
+        <button class="fx-key fx-num" onclick="fxKey('5')">5</button>
+        <button class="fx-key fx-num" onclick="fxKey('6')">6</button>
+        <button class="fx-key fx-num" onclick="fxKey('1')">1</button>
+        <button class="fx-key fx-num" onclick="fxKey('2')">2</button>
+        <button class="fx-key fx-num" onclick="fxKey('3')">3</button>
+        <button class="fx-key fx-del" onclick="fxDel()">⌫</button>
+        <button class="fx-key fx-num" onclick="fxKey('0')">0</button>
+        <button class="fx-key fx-dot" onclick="fxKey('.')">.</button>
+        <button class="fx-key fx-clr fx-full" onclick="fxClear()">AC 清除</button>
+      </div>
+    </div>
+
     <div class="footer-deco">🌷 🌼 🌻 🌼 🌷</div>
   </div>
 
   <script>
-    const tulipSVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
-      <circle cx="96" cy="96" r="96" fill="#fffde7"/>
-      <circle cx="96" cy="96" r="90" fill="none" stroke="#fff176" stroke-width="4"/>
-      <rect x="92" y="115" width="8" height="52" rx="4" fill="#4a8a3a"/>
-      <ellipse cx="74"  cy="138" rx="18" ry="8" fill="#5aaa4a" transform="rotate(-35 74 138)"/>
-      <ellipse cx="118" cy="138" rx="18" ry="8" fill="#5aaa4a" transform="rotate(35 118 138)"/>
-      <ellipse cx="68"  cy="90"  rx="16" ry="30" fill="#ffee58" transform="rotate(-22 68 90)"/>
-      <ellipse cx="124" cy="90"  rx="16" ry="30" fill="#f9a825" transform="rotate(22 124 90)"/>
-      <ellipse cx="96"  cy="78"  rx="20" ry="38" fill="#fdd835"/>
-      <ellipse cx="90"  cy="65"  rx="8"  ry="16" fill="rgba(255,255,255,0.35)"/>
-      <circle  cx="96"  cy="58"  r="4"           fill="#fff9c4" opacity="0.8"/>
-      <ellipse cx="60"  cy="170" rx="12" ry="6"  fill="#4a8a3a" opacity="0.5" transform="rotate(-20 60 170)"/>
-      <ellipse cx="132" cy="170" rx="12" ry="6"  fill="#4a8a3a" opacity="0.5" transform="rotate(20 132 170)"/>
-    </svg>`;
-    const svgBlob = new Blob([tulipSVG], {type:'image/svg+xml'});
-    document.getElementById('favicon').href = URL.createObjectURL(svgBlob);
-
+    /* ══ 落花 ══ */
     const petalsEmoji = ['🌷','🌼','🌻','✨','🌾'];
     const petalContainer = document.getElementById('petals-container');
     function createPetal() {
@@ -257,54 +406,121 @@
     for (let i = 0; i < 10; i++) setTimeout(createPetal, i*1000);
     setInterval(createPetal, 1800);
 
+    /* ══ 計算機 ══ */
     const display = document.getElementById('display');
-
-    // 捲動到最右邊的輔助函式
-    function scrollToEnd() {
-      display.scrollLeft = display.scrollWidth;
-    }
-
+    function scrollToEnd() { display.scrollLeft = display.scrollWidth; }
     function appendToDisplay(v) {
       if(display.value==='錯誤') display.value='';
-      display.value += v;
-      scrollToEnd(); // ← 每次輸入後捲到最右邊
+      display.value += v; scrollToEnd();
     }
-    function clearDisplay()  { display.value=''; }
-    function backspace()     {
-      display.value = display.value.slice(0,-1);
+    function clearDisplay() { display.value=''; }
+    function backspace() { display.value = display.value.slice(0,-1); scrollToEnd(); }
+    function toggleSign() {
+      if(!display.value) return;
+      display.value = display.value.startsWith('-') ? display.value.slice(1) : '-'+display.value;
       scrollToEnd();
     }
     function calculate() {
       try {
         let e = display.value.replace(/×/g,'*').replace(/÷/g,'/').replace(/−/g,'-');
-        display.value = parseFloat(eval(e).toPrecision(10));
-        scrollToEnd();
-      } catch { display.value='錯誤'; }
-    }
-    function sqrt()  { try{display.value=parseFloat(Math.sqrt(eval(display.value)).toPrecision(10));scrollToEnd();}catch{display.value='錯誤';} }
-    function power() { appendToDisplay('**'); }
-    function doLog() { try{display.value=parseFloat(Math.log10(eval(display.value)).toPrecision(10));scrollToEnd();}catch{display.value='錯誤';} }
-    function ln()    { try{display.value=parseFloat(Math.log(eval(display.value)).toPrecision(10));scrollToEnd();}catch{display.value='錯誤';} }
-    function doSin() { try{display.value=parseFloat(Math.sin(eval(display.value)).toPrecision(10));scrollToEnd();}catch{display.value='錯誤';} }
-    function doCos() { try{display.value=parseFloat(Math.cos(eval(display.value)).toPrecision(10));scrollToEnd();}catch{display.value='錯誤';} }
-    function doTan() { try{display.value=parseFloat(Math.tan(eval(display.value)).toPrecision(10));scrollToEnd();}catch{display.value='錯誤';} }
-    function factorial() {
-      try {
-        const n=parseInt(eval(display.value));
-        if(n<0||n>170) throw new Error();
-        let r=1; for(let i=2;i<=n;i++) r*=i;
-        display.value=r;
-        scrollToEnd();
+        display.value = parseFloat(eval(e).toPrecision(10)); scrollToEnd();
       } catch { display.value='錯誤'; }
     }
 
-    // ✅ Service Worker 註冊
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./service-worker.js')
-          .then(reg => console.log('✅ Service Worker 註冊成功', reg))
-          .catch(err => console.log('❌ Service Worker 註冊失敗', err));
-      });
+    /* ══ 即時匯率 ══ */
+    let RATES = {};
+    let rateDate = '';
+    let fxFrom = 'TWD', fxTo = 'JPY', fxExpr = '';
+
+    async function fetchRates() {
+      const bar = document.getElementById('fx-rate-bar');
+      try {
+        const res  = await fetch('https://open.er-api.com/v6/latest/USD');
+        const data = await res.json();
+        if (data.result !== 'success') throw new Error('API 失敗');
+        const r = data.rates;
+        const usdTwd = r['TWD'];
+        const usdJpy = r['JPY'];
+        RATES['USD_TWD'] = usdTwd;
+        RATES['TWD_USD'] = 1 / usdTwd;
+        RATES['USD_JPY'] = usdJpy;
+        RATES['JPY_USD'] = 1 / usdJpy;
+        RATES['TWD_JPY'] = usdJpy / usdTwd;
+        RATES['JPY_TWD'] = usdTwd / usdJpy;
+        const utcDate = new Date(data.time_last_update_utc);
+        const twDate  = new Date(utcDate.getTime() + 8*60*60*1000);
+        rateDate = `${twDate.getFullYear()}/${String(twDate.getMonth()+1).padStart(2,'0')}/${String(twDate.getDate()).padStart(2,'0')}`;
+        bar.innerHTML = `
+          <div>🇺🇸 1 USD = <span>${usdTwd.toFixed(2)}</span> TWD</div>
+          <div>🇹🇼 1 TWD = <span>${RATES['TWD_JPY'].toFixed(4)}</span> JPY</div>
+          <div>🇯🇵 1 JPY = <span>${RATES['JPY_TWD'].toFixed(4)}</span> TWD</div>
+          <div class="rate-update">📅 即時匯率 ${rateDate} ✅</div>
+        `;
+        fxConvert();
+      } catch(err) {
+        RATES = { 'TWD_JPY':4.987,'JPY_TWD':0.2005,'TWD_USD':0.03143,'USD_TWD':31.81 };
+        bar.innerHTML = `
+          <div>🇺🇸 1 USD = <span>31.81</span> TWD</div>
+          <div>🇹🇼 1 TWD = <span>4.987</span> JPY</div>
+          <div>🇯🇵 1 JPY = <span>0.2005</span> TWD</div>
+          <div class="rate-update">⚠️ 網路異常，使用備用匯率</div>
+        `;
+      }
+    }
+    fetchRates();
+
+    function selectPair(from, to) {
+      fxFrom = from; fxTo = to;
+      document.getElementById('fx-from-tag').textContent = from;
+      document.getElementById('fx-to-tag').textContent   = to;
+      document.querySelectorAll('.fx-pair-btn').forEach(b => b.classList.remove('selected'));
+      const el = document.getElementById('btn-' + from.toLowerCase() + '-' + to.toLowerCase());
+      if (el) el.classList.add('selected');
+      fxClear();
+    }
+    function fxKey(v) {
+      if (v === '.' && fxExpr.includes('.')) return;
+      if (fxExpr === '0' && v !== '.') fxExpr = v;
+      else fxExpr += v;
+      updateFxDisplay(); fxConvert();
+    }
+    function fxDel()   { fxExpr = fxExpr.slice(0,-1); updateFxDisplay(); fxConvert(); }
+    function fxClear() {
+      fxExpr = '';
+      document.getElementById('fx-display-val').textContent = '0';
+      document.getElementById('fx-result').textContent = '—';
+    }
+    function updateFxDisplay() {
+      document.getElementById('fx-display-val').textContent = fxExpr || '0';
+    }
+    function fxConvert() {
+      const amt = parseFloat(fxExpr);
+      if (isNaN(amt) || fxExpr === '') {
+        document.getElementById('fx-result').textContent = '—'; return;
+      }
+      const rate = RATES[fxFrom + '_' + fxTo];
+      if (!rate) { document.getElementById('fx-result').textContent = '—'; return; }
+      const result = amt * rate;
+      let fmt;
+      if      (fxTo === 'JPY') fmt = Math.round(result).toLocaleString() + ' ¥';
+      else if (fxTo === 'USD') fmt = '$ ' + result.toFixed(2);
+      else                     fmt = 'NT$ ' + result.toFixed(2);
+      document.getElementById('fx-result').textContent = fmt;
+    }
+
+    /* ══ Tab 切換 ══ */
+    function switchTab(tab) {
+      const cp = document.getElementById('calc-panel');
+      const fp = document.getElementById('fx-panel');
+      const tc = document.getElementById('tab-calc');
+      const tf = document.getElementById('tab-fx');
+      if (tab === 'calc') {
+        cp.classList.remove('hidden'); fp.classList.remove('active');
+        tc.classList.add('active');    tf.classList.remove('active');
+      } else {
+        cp.classList.add('hidden');    fp.classList.add('active');
+        tc.classList.remove('active'); tf.classList.add('active');
+      }
     }
   </script>
 </body>
