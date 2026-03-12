@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tulip-calc-v1';
+const CACHE_NAME = 'tulip-calc-v2';
 const urlsToCache = [
   './calculator.html',
   './manifest.json',
