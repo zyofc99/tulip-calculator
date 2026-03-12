@@ -1,9 +1,11 @@
-const CACHE_NAME = 'tulip-calc-v2';
+const CACHE_NAME = 'tulip-calc-v3';
 const urlsToCache = [
-  './calculator.html',
-  './manifest.json',
-  './icon-192.png',
-  './icon-512.png'
+  '/tulip-calculator/',
+  '/tulip-calculator/index.html',
+  '/tulip-calculator/calculator.html',
+  '/tulip-calculator/manifest.json',
+  '/tulip-calculator/icon-192.png',
+  '/tulip-calculator/icon-512.png'
 ];
 
 // 安裝時快取檔案
