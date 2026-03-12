@@ -10,6 +10,7 @@
   "background_color": "#fffde7",
   "theme_color": "#f9a825",
   "lang": "zh-TW",
+  "dir": "ltr",
   "categories": ["utilities", "productivity"],
   "icons": [
     {
@@ -29,6 +30,22 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshot-1.jpg",
+      "sizes": "484x1072",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "鬱金香計算機 - 計算機畫面"
+    },
+    {
+      "src": "screenshot-2.jpg",
+      "sizes": "484x1072",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "鬱金香計算機 - 匯率換算畫面"
     }
   ],
   "prefer_related_applications": false
