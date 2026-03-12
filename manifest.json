@@ -35,14 +35,14 @@
   "screenshots": [
     {
       "src": "screenshot-1.jpg",
-      "sizes": "484x1072",
+      "sizes": "968x2144",
       "type": "image/jpeg",
       "form_factor": "narrow",
       "label": "鬱金香計算機 - 計算機畫面"
     },
     {
       "src": "screenshot-2.jpg",
-      "sizes": "484x1072",
+      "sizes": "968x2144",
       "type": "image/jpeg",
       "form_factor": "narrow",
       "label": "鬱金香計算機 - 匯率換算畫面"
