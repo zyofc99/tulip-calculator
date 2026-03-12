@@ -8,7 +8,8 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>鬱金香計算機</title>
-  <link rel="manifest" href="./manifest.json">
+  <!-- ✅ 修正：改為絕對路徑 -->
+  <link rel="manifest" href="/tulip-calculator/manifest.json">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap');
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -494,21 +495,20 @@
       } else {
         cp.classList.add('hidden');    fp.classList.add('active');
         tc.classList.remove('active'); tf.classList.add('active');
-        fetchRates(); // ✅ 切換到匯率頁籤時重新抓取
+        fetchRates();
       }
     }
 
     /* ══ Service Worker 註冊 ══ */
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-       navigator.serviceWorker.register('/tulip-calculator/service-worker.js')
+        // ✅ 修正：改為絕對路徑
+        navigator.serviceWorker.register('/tulip-calculator/service-worker.js')
           .then(reg => {
-            // ✅ 偵測到新版本立即更新
             reg.onupdatefound = () => {
               const newWorker = reg.installing;
               newWorker.onstatechange = () => {
                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                  // 有新版本，強制重新載入
                   window.location.reload();
                 }
               };
