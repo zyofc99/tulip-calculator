@@ -1,5 +1,5 @@
-/* 🌷 鬱金香計算機 Service Worker v9 */
-const CACHE_NAME = 'tulip-calc-v9';
+/* 🌷 鬱金香計算機 Service Worker v10 */
+const CACHE_NAME = 'tulip-calc-v10';
 const RATES_CACHE_KEY = 'tulip-fx-rates';
 
 const PRECACHE_URLS = [
