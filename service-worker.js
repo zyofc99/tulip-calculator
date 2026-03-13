@@ -1,10 +1,11 @@
-const CACHE_NAME = 'tulip-calc-v4';
+const CACHE_NAME = 'tulip-calc-v5';
 const urlsToCache = [
   '/tulip-calculator/',
   '/tulip-calculator/calculator.html',
   '/tulip-calculator/manifest.json',
   '/tulip-calculator/icon-192x192.png',
   '/tulip-calculator/icon-512x512.png',
+  '/tulip-calculator/icon-maskable-512x512.png',
   '/tulip-calculator/screenshot-1.jpg',
   '/tulip-calculator/screenshot-2.jpg'
 ];
@@ -33,7 +34,7 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// 攔截請求：網路優先，失敗才用快取（匯率API需要即時資料）
+// 攔截請求
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
@@ -43,15 +44,40 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 其他資源：快取優先
+  // 靜態資源：Stale-While-Revalidate（先回傳快取，背景更新）
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request).then((fetchResponse) => {
-        return caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, fetchResponse.clone());
-          return fetchResponse;
-        });
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.match(event.request).then((cachedResponse) => {
+        const fetchPromise = fetch(event.request).then((networkResponse) => {
+          cache.put(event.request, networkResponse.clone());
+          return networkResponse;
+        }).catch(() => cachedResponse); // 網路失敗時回傳快取
+
+        return cachedResponse || fetchPromise;
       });
     })
+  );
+});
+
+// ✅ Push 通知支援
+self.addEventListener('push', (event) => {
+  const data = event.data?.json() ?? {
+    title: '🌷 鬱金香計算機',
+    body: '有新通知！'
+  };
+  event.waitUntil(
+    self.registration.showNotification(data.title, {
+      body: data.body,
+      icon: '/tulip-calculator/icon-192x192.png',
+      badge: '/tulip-calculator/icon-192x192.png'
+    })
+  );
+});
+
+// ✅ 通知點擊事件
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil(
+    clients.openWindow('/tulip-calculator/calculator.html')
   );
 });
