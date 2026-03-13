@@ -35,15 +35,12 @@
     "client_mode": ["focus-existing", "auto"]
   },
 
-  "✅ 新增 protocol_handlers": "讓 PWA 處理自訂協議",
   "protocol_handlers": [
     {
       "protocol": "web+tulip",
       "url": "/tulip-calculator/calculator.html?protocol=%s"
     }
   ],
-
-  "✅ 新增 file_handlers": "讓 PWA 可開啟 .csv 檔案（匯率資料）",
   "file_handlers": [
     {
       "action": "/tulip-calculator/calculator.html",
@@ -53,7 +50,6 @@
     }
   ],
 
-  "✅ 新增 share_target": "出現在系統分享選單",
   "share_target": {
     "action": "/tulip-calculator/calculator.html",
     "method": "GET",
