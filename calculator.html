@@ -413,39 +413,75 @@
       } catch { display.value='錯誤'; }
     }
 
-    /* ══ 即時匯率（多 API 備援）══ */
+    /* ══ 即時匯率（多 API 備援 + Timeout + localStorage 快取）══ */
     let RATES = {};
     let fxFrom = 'TWD', fxTo = 'JPY', fxExpr = '';
 
+    // ✅ Timeout 包裝
+    function fetchWithTimeout(url, options = {}, ms = 8000) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), ms);
+      return fetch(url, { ...options, signal: controller.signal })
+        .finally(() => clearTimeout(timer));
+    }
+
+    // ✅ API 1：Frankfurter
     async function fetchFromFrankfurter() {
-      const res  = await fetch('https://api.frankfurter.app/latest?from=USD&to=TWD,JPY', { cache: 'no-store' });
+      const res = await fetchWithTimeout(
+        'https://api.frankfurter.app/latest?from=USD&to=TWD,JPY',
+        { cache: 'no-store' }, 8000
+      );
+      if (!res.ok) throw new Error('Frankfurter HTTP ' + res.status);
       const data = await res.json();
-      if (!data.rates) throw new Error('Frankfurter 失敗');
+      if (!data.rates) throw new Error('Frankfurter 無 rates');
       return { usdTwd: data.rates['TWD'], usdJpy: data.rates['JPY'], date: data.date };
     }
 
+    // ✅ API 2：OpenER
     async function fetchFromOpenER() {
-      const res  = await fetch('https://open.er-api.com/v6/latest/USD', { cache: 'no-store' });
+      const res = await fetchWithTimeout(
+        'https://open.er-api.com/v6/latest/USD',
+        { cache: 'no-store' }, 8000
+      );
+      if (!res.ok) throw new Error('OpenER HTTP ' + res.status);
       const data = await res.json();
-      if (data.result !== 'success') throw new Error('OpenER 失敗');
+      if (data.result !== 'success') throw new Error('OpenER result 非 success');
       const utcDate = new Date(data.time_last_update_utc);
-      const twDate  = new Date(utcDate.getTime() + 8*60*60*1000);
+      const twDate  = new Date(utcDate.getTime() + 8 * 60 * 60 * 1000);
       const date = `${twDate.getFullYear()}/${String(twDate.getMonth()+1).padStart(2,'0')}/${String(twDate.getDate()).padStart(2,'0')}`;
       return { usdTwd: data.rates['TWD'], usdJpy: data.rates['JPY'], date };
     }
 
+    // ✅ API 3：ExchangeRate-API（第三備援）
+    async function fetchFromExchangeRate() {
+      const res = await fetchWithTimeout(
+        'https://api.exchangerate-api.com/v4/latest/USD',
+        { cache: 'no-store' }, 8000
+      );
+      if (!res.ok) throw new Error('ExchangeRate HTTP ' + res.status);
+      const data = await res.json();
+      if (!data.rates) throw new Error('ExchangeRate 無 rates');
+      return { usdTwd: data.rates['TWD'], usdJpy: data.rates['JPY'], date: data.date };
+    }
+
+    // ✅ 主函式
     async function fetchRates() {
       const bar = document.getElementById('fx-rate-bar');
+      bar.innerHTML = `<div class="fx-loading" style="width:100%;text-align:center;">🌷 匯率載入中...</div>`;
       let result = null;
 
-      // 依序嘗試多個 API
-      const apis = [fetchFromFrankfurter, fetchFromOpenER];
-      for (const apiFn of apis) {
+      const apis = [
+        { fn: fetchFromFrankfurter, name: 'Frankfurter'  },
+        { fn: fetchFromOpenER,      name: 'OpenER'        },
+        { fn: fetchFromExchangeRate,name: 'ExchangeRate'  }
+      ];
+
+      for (const api of apis) {
         try {
-          result = await apiFn();
-          break; // 成功就跳出
+          result = await api.fn();
+          if (result) { console.log('[FX] 成功來源:', api.name); break; }
         } catch(e) {
-          console.warn('API 嘗試失敗:', e.message);
+          console.warn('[FX]', api.name, '失敗:', e.message);
         }
       }
 
@@ -458,10 +494,14 @@
         RATES['TWD_JPY'] = usdJpy / usdTwd;
         RATES['JPY_TWD'] = usdTwd / usdJpy;
 
-        // 格式化日期
+        // 存 localStorage 備用
+        try {
+          localStorage.setItem('lastRates', JSON.stringify(RATES));
+          localStorage.setItem('lastRateDate', String(date));
+        } catch(e) {}
+
         const dateStr = typeof date === 'string' && date.includes('-')
-          ? date.replace(/-/g, '/')
-          : date;
+          ? date.replace(/-/g, '/') : String(date);
 
         bar.innerHTML = `
           <div>🇺🇸 1 USD = <span>${usdTwd.toFixed(2)}</span> TWD</div>
@@ -470,14 +510,36 @@
           <div class="rate-update">📅 即時匯率 ${dateStr} ✅</div>
         `;
       } else {
-        // 所有 API 都失敗，使用備用匯率
-        RATES = { 'TWD_JPY':4.987,'JPY_TWD':0.2005,'TWD_USD':0.03143,'USD_TWD':31.81 };
-        bar.innerHTML = `
-          <div>🇺🇸 1 USD = <span>31.81</span> TWD</div>
-          <div>🇹🇼 1 TWD = <span>4.987</span> JPY</div>
-          <div>🇯🇵 1 JPY = <span>0.2005</span> TWD</div>
-          <div class="rate-update">⚠️ 網路異常，使用備用匯率</div>
-        `;
+        // 先試 localStorage 快取
+        let cached = null, cachedDate = '';
+        try {
+          const raw = localStorage.getItem('lastRates');
+          if (raw) cached = JSON.parse(raw);
+          cachedDate = localStorage.getItem('lastRateDate') || '';
+        } catch(e) {}
+
+        if (cached) {
+          RATES = cached;
+          bar.innerHTML = `
+            <div>🇺🇸 1 USD = <span>${(RATES['USD_TWD']||0).toFixed(2)}</span> TWD</div>
+            <div>🇹🇼 1 TWD = <span>${(RATES['TWD_JPY']||0).toFixed(4)}</span> JPY</div>
+            <div>🇯🇵 1 JPY = <span>${(RATES['JPY_TWD']||0).toFixed(4)}</span> TWD</div>
+            <div class="rate-update">📦 上次快取匯率 ${cachedDate} ⚠️</div>
+          `;
+        } else {
+          // 最終靜態備用
+          RATES = {
+            'TWD_JPY':4.987,'JPY_TWD':0.2005,
+            'TWD_USD':0.03143,'USD_TWD':31.81,
+            'USD_JPY':154.2,'JPY_USD':0.00648
+          };
+          bar.innerHTML = `
+            <div>🇺🇸 1 USD = <span>31.81</span> TWD</div>
+            <div>🇹🇼 1 TWD = <span>4.987</span> JPY</div>
+            <div>🇯🇵 1 JPY = <span>0.2005</span> TWD</div>
+            <div class="rate-update">⚠️ 網路異常，使用備用匯率</div>
+          `;
+        }
       }
       fxConvert();
     }
