@@ -13,19 +13,17 @@
   "lang": "zh-TW",
   "dir": "ltr",
   "categories": ["utilities", "productivity"],
-  "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7",
-  "related_applications": [],
   "prefer_related_applications": false,
   "icons": [
     {
       "src": "icon-192x192.png",
-      "sizes": "192x192",
+      "sizes": "1024x1024",
       "type": "image/png",
       "purpose": "any"
     },
     {
       "src": "icon-512x512.png",
-      "sizes": "512x512",
+      "sizes": "1024x1024",
       "type": "image/png",
       "purpose": "any"
     },
@@ -36,6 +34,13 @@
       "purpose": "maskable"
     }
   ],
+  "launch_handler": {
+    "client_mode": ["focus-existing", "auto"]
+  },
+  "handle_links": "preferred",
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
   "screenshots": [
     {
       "src": "screenshot-1.jpg",
@@ -65,26 +70,14 @@
       "short_name": "計算機",
       "description": "直接開啟計算機功能",
       "url": "/tulip-calculator/calculator.html?mode=calc",
-      "icons": [
-        {
-          "src": "icon-192x192.png",
-          "sizes": "192x192",
-          "type": "image/png"
-        }
-      ]
+      "icons": [{ "src": "icon-192x192.png", "sizes": "1024x1024" }]
     },
     {
       "name": "匯率換算",
       "short_name": "匯率",
       "description": "直接開啟匯率換算功能",
       "url": "/tulip-calculator/calculator.html?mode=exchange",
-      "icons": [
-        {
-          "src": "icon-192x192.png",
-          "sizes": "192x192",
-          "type": "image/png"
-        }
-      ]
+      "icons": [{ "src": "icon-192x192.png", "sizes": "1024x1024" }]
     }
   ]
 }
