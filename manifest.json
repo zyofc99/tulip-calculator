@@ -6,7 +6,7 @@
   "start_url": "/tulip-calculator/calculator.html",
   "scope": "/tulip-calculator/",
   "display": "standalone",
-  "display_override": ["window-controls-overlay", "tabbed", "standalone"],
+  "display_override": ["tabbed", "window-controls-overlay", "standalone"],
   "orientation": "portrait",
   "background_color": "#1a3a5c",
   "theme_color": "#f9a825",
@@ -41,6 +41,7 @@
       "url": "/tulip-calculator/calculator.html?protocol=%s"
     }
   ],
+
   "file_handlers": [
     {
       "action": "/tulip-calculator/calculator.html",
@@ -59,6 +60,33 @@
       "url": "url"
     }
   },
+
+  "widgets": [
+    {
+      "name": "鬱金香計算機",
+      "description": "黃色鬱金香風格計算機，支援即時匯率換算",
+      "tag": "tulip-calculator-widget",
+      "template": "pwas-widget",
+      "ms_ac_template": "widget.html",
+      "data": "/tulip-calculator/widget.html",
+      "type": "text/html",
+      "screenshots": [
+        {
+          "src": "screenshot-1.jpg",
+          "sizes": "1260x2800",
+          "label": "鬱金香計算機 Widget"
+        }
+      ],
+      "icons": [
+        {
+          "src": "icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ],
+      "auth": false,
+      "update": 86400
+    }
+  ],
 
   "icons": [
     {
