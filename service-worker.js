@@ -1,145 +1,72 @@
-const CACHE_NAME = 'tulip-calc-v6';
-const urlsToCache = [
+/* 🌷 鬱金香計算機 Service Worker v5 */
+const CACHE_NAME = 'tulip-calc-v5';  // ← 每次改版就把數字+1
+
+const PRECACHE_URLS = [
   '/tulip-calculator/',
+  '/tulip-calculator/index.html',
   '/tulip-calculator/calculator.html',
   '/tulip-calculator/manifest.json',
-  '/tulip-calculator/icon-192x192.png',
-  '/tulip-calculator/icon-512x512.png',
-  '/tulip-calculator/icon-maskable-512x512.png',
-  '/tulip-calculator/screenshot-1.jpg',
-  '/tulip-calculator/screenshot-2.jpg'
 ];
 
-// ✅ 所有匯率 API 的 hostname 清單
-const API_HOSTNAMES = [
-  'open.er-api.com',
-  'api.frankfurter.app',
-  'api.exchangerate-api.com',
-  'api.exchangeratesapi.io',
-  'cdn.jsdelivr.net'
-];
-
-// 安裝時快取檔案
-self.addEventListener('install', (event) => {
+/* ══ 安裝：預先快取靜態資源 ══ */
+self.addEventListener('install', event => {
+  self.skipWaiting(); // 立即接管，不等舊 SW
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(urlsToCache);
-    })
+    caches.open(CACHE_NAME).then(cache => cache.addAll(PRECACHE_URLS))
   );
-  self.skipWaiting();
 });
 
-// 啟動時清除舊快取
-self.addEventListener('activate', (event) => {
+/* ══ 啟動：刪除舊版快取 ══ */
+self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames
-          .filter(name => name !== CACHE_NAME)
-          .map(name => caches.delete(name))
-      );
-    })
+    caches.keys().then(keys =>
+      Promise.all(
+        keys
+          .filter(key => key !== CACHE_NAME)
+          .map(key => {
+            console.log('[SW] 刪除舊快取:', key);
+            return caches.delete(key);
+          })
+      )
+    ).then(() => self.clients.claim()) // 立即接管所有頁面
   );
-  self.clients.claim();
 });
 
-// 攔截請求
-self.addEventListener('fetch', (event) => {
+/* ══ 攔截請求：網路優先策略 ══ */
+self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
 
-  // ✅ 所有匯率 API 永遠走網路，不快取、不攔截
-  if (API_HOSTNAMES.includes(url.hostname)) {
+  // 外部 API 請求：完全不快取，直接走網路
+  const externalAPIs = [
+    'api.frankfurter.app',
+    'open.er-api.com',
+    'api.exchangerate-api.com'
+  ];
+  if (externalAPIs.some(api => url.hostname.includes(api))) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+
+  // Google Fonts：網路優先，失敗才用快取
+  if (url.hostname.includes('fonts.googleapis.com') ||
+      url.hostname.includes('fonts.gstatic.com')) {
     event.respondWith(
-      fetch(event.request, { cache: 'no-store' })
-        .catch((err) => {
-          console.warn('[SW] API fetch 失敗:', url.hostname, err.message);
-          // 回傳一個空的錯誤 Response，讓前端自己處理 fallback
-          return new Response(JSON.stringify({ error: 'network_fail' }), {
-            status: 503,
-            headers: { 'Content-Type': 'application/json' }
-          });
-        })
+      fetch(event.request).catch(() => caches.match(event.request))
     );
     return;
   }
 
-  // ✅ Google Fonts 等外部資源：直接走網路，失敗就算了
-  if (url.origin !== self.location.origin) {
-    event.respondWith(
-      fetch(event.request).catch(() => new Response('', { status: 408 }))
-    );
-    return;
-  }
-
-  // ✅ 靜態資源：Stale-While-Revalidate
+  // 本地靜態資源：網路優先，失敗才用快取（離線模式）
   event.respondWith(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.match(event.request).then((cachedResponse) => {
-        const fetchPromise = fetch(event.request)
-          .then((networkResponse) => {
-            if (networkResponse && networkResponse.status === 200) {
-              cache.put(event.request, networkResponse.clone());
-            }
-            return networkResponse;
-          })
-          .catch(() => cachedResponse);
-        return cachedResponse || fetchPromise;
-      });
-    })
+    fetch(event.request)
+      .then(response => {
+        // 成功就更新快取
+        if (response && response.status === 200 && response.type === 'basic') {
+          const cloned = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, cloned));
+        }
+        return response;
+      })
+      .catch(() => caches.match(event.request)) // 離線時用快取
   );
-});
-
-// ✅ Push 通知支援
-self.addEventListener('push', (event) => {
-  const data = event.data?.json() ?? {
-    title: '🌷 鬱金香計算機',
-    body: '有新通知！'
-  };
-  event.waitUntil(
-    self.registration.showNotification(data.title, {
-      body: data.body,
-      icon: '/tulip-calculator/icon-192x192.png',
-      badge: '/tulip-calculator/icon-192x192.png'
-    })
-  );
-});
-
-// ✅ 通知點擊事件
-self.addEventListener('notificationclick', (event) => {
-  event.notification.close();
-  event.waitUntil(
-    clients.openWindow('/tulip-calculator/calculator.html')
-  );
-});
-
-// ✅ Background Sync（網路恢復時自動同步）
-self.addEventListener('sync', (event) => {
-  if (event.tag === 'sync-exchange-rate') {
-    event.waitUntil(
-      fetch('https://open.er-api.com/v6/latest/USD', { cache: 'no-store' })
-        .then(response => response.json())
-        .then(data => {
-          console.log('[SW] Background Sync 匯率更新成功', data);
-        })
-        .catch(err => {
-          console.error('[SW] Background Sync 失敗', err);
-        })
-    );
-  }
-});
-
-// ✅ Periodic Background Sync（定期自動同步匯率）
-self.addEventListener('periodicsync', (event) => {
-  if (event.tag === 'periodic-exchange-rate') {
-    event.waitUntil(
-      fetch('https://open.er-api.com/v6/latest/USD', { cache: 'no-store' })
-        .then(response => response.json())
-        .then(data => {
-          console.log('[SW] Periodic Sync 匯率更新成功', data);
-        })
-        .catch(err => {
-          console.error('[SW] Periodic Sync 失敗', err);
-        })
-    );
-  }
 });
