@@ -424,59 +424,38 @@
         .finally(() => clearTimeout(timer));
     }
 
-    // ✅ API 1：Fawaz Ahmed（jsdelivr CDN，台灣可用）
     async function fetchFromFawaz() {
-      const res = await fetchWithTimeout(
-        'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json',
-        { cache: 'no-store' }, 8000
-      );
+      const res = await fetchWithTimeout('https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json',{ cache: 'no-store' }, 8000);
       if (!res.ok) throw new Error('Fawaz HTTP ' + res.status);
       const data = await res.json();
       if (!data.usd) throw new Error('Fawaz 無 usd');
-      const usdTwd = data.usd['twd'];
-      const usdJpy = data.usd['jpy'];
+      const usdTwd = data.usd['twd'], usdJpy = data.usd['jpy'];
       if (!usdTwd || !usdJpy) throw new Error('Fawaz 缺少幣別');
       const today = new Date();
       const date = `${today.getFullYear()}/${String(today.getMonth()+1).padStart(2,'0')}/${String(today.getDate()).padStart(2,'0')}`;
       return { usdTwd, usdJpy, date };
     }
-
-    // ✅ API 2：Fawaz Ahmed 日期版鏡像
     async function fetchFromFawazMirror() {
       const today = new Date();
       const dateStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
-      const res = await fetchWithTimeout(
-        `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@${dateStr}/v1/currencies/usd.json`,
-        { cache: 'no-store' }, 8000
-      );
+      const res = await fetchWithTimeout(`https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@${dateStr}/v1/currencies/usd.json`,{ cache: 'no-store' }, 8000);
       if (!res.ok) throw new Error('FawazMirror HTTP ' + res.status);
       const data = await res.json();
       if (!data.usd) throw new Error('FawazMirror 無 usd');
-      const usdTwd = data.usd['twd'];
-      const usdJpy = data.usd['jpy'];
+      const usdTwd = data.usd['twd'], usdJpy = data.usd['jpy'];
       if (!usdTwd || !usdJpy) throw new Error('FawazMirror 缺少幣別');
       const date = `${today.getFullYear()}/${String(today.getMonth()+1).padStart(2,'0')}/${String(today.getDate()).padStart(2,'0')}`;
       return { usdTwd, usdJpy, date };
     }
-
-    // ✅ API 3：Frankfurter
     async function fetchFromFrankfurter() {
-      const res = await fetchWithTimeout(
-        'https://api.frankfurter.app/latest?from=USD&to=TWD,JPY',
-        { cache: 'no-store' }, 8000
-      );
+      const res = await fetchWithTimeout('https://api.frankfurter.app/latest?from=USD&to=TWD,JPY',{ cache: 'no-store' }, 8000);
       if (!res.ok) throw new Error('Frankfurter HTTP ' + res.status);
       const data = await res.json();
       if (!data.rates) throw new Error('Frankfurter 無 rates');
       return { usdTwd: data.rates['TWD'], usdJpy: data.rates['JPY'], date: data.date };
     }
-
-    // ✅ API 4：OpenER
     async function fetchFromOpenER() {
-      const res = await fetchWithTimeout(
-        'https://open.er-api.com/v6/latest/USD',
-        { cache: 'no-store' }, 8000
-      );
+      const res = await fetchWithTimeout('https://open.er-api.com/v6/latest/USD',{ cache: 'no-store' }, 8000);
       if (!res.ok) throw new Error('OpenER HTTP ' + res.status);
       const data = await res.json();
       if (data.result !== 'success') throw new Error('OpenER result 非 success');
@@ -485,25 +464,18 @@
       const date = `${twDate.getFullYear()}/${String(twDate.getMonth()+1).padStart(2,'0')}/${String(twDate.getDate()).padStart(2,'0')}`;
       return { usdTwd: data.rates['TWD'], usdJpy: data.rates['JPY'], date };
     }
-
-    // ✅ API 5：ExchangeRate-API
     async function fetchFromExchangeRate() {
-      const res = await fetchWithTimeout(
-        'https://api.exchangerate-api.com/v4/latest/USD',
-        { cache: 'no-store' }, 8000
-      );
+      const res = await fetchWithTimeout('https://api.exchangerate-api.com/v4/latest/USD',{ cache: 'no-store' }, 8000);
       if (!res.ok) throw new Error('ExchangeRate HTTP ' + res.status);
       const data = await res.json();
       if (!data.rates) throw new Error('ExchangeRate 無 rates');
       return { usdTwd: data.rates['TWD'], usdJpy: data.rates['JPY'], date: data.date };
     }
 
-    // ✅ 主函式
     async function fetchRates() {
       const bar = document.getElementById('fx-rate-bar');
       bar.innerHTML = `<div class="fx-loading" style="width:100%;text-align:center;">🌷 匯率載入中...</div>`;
       let result = null;
-
       const apis = [
         { fn: fetchFromFawaz,        name: 'Fawaz(jsdelivr)'  },
         { fn: fetchFromFawazMirror,  name: 'FawazMirror'      },
@@ -511,7 +483,6 @@
         { fn: fetchFromOpenER,       name: 'OpenER'           },
         { fn: fetchFromExchangeRate, name: 'ExchangeRate'     }
       ];
-
       for (const api of apis) {
         try {
           result = await api.fn();
@@ -520,7 +491,6 @@
           console.warn('[FX]', api.name, '失敗:', e.message);
         }
       }
-
       if (result) {
         const { usdTwd, usdJpy, date } = result;
         RATES['USD_TWD'] = usdTwd;
@@ -529,15 +499,11 @@
         RATES['JPY_USD'] = 1 / usdJpy;
         RATES['TWD_JPY'] = usdJpy / usdTwd;
         RATES['JPY_TWD'] = usdTwd / usdJpy;
-
         try {
           localStorage.setItem('lastRates', JSON.stringify(RATES));
           localStorage.setItem('lastRateDate', String(date));
         } catch(e) {}
-
-        const dateStr = typeof date === 'string' && date.includes('-')
-          ? date.replace(/-/g, '/') : String(date);
-
+        const dateStr = typeof date === 'string' && date.includes('-') ? date.replace(/-/g, '/') : String(date);
         bar.innerHTML = `
           <div>🇺🇸 1 USD = <span>${usdTwd.toFixed(2)}</span> TWD</div>
           <div>🇹🇼 1 TWD = <span>${RATES['TWD_JPY'].toFixed(4)}</span> JPY</div>
@@ -551,7 +517,6 @@
           if (raw) cached = JSON.parse(raw);
           cachedDate = localStorage.getItem('lastRateDate') || '';
         } catch(e) {}
-
         if (cached) {
           RATES = cached;
           bar.innerHTML = `
@@ -561,11 +526,7 @@
             <div class="rate-update">📦 上次快取匯率 ${cachedDate} ⚠️</div>
           `;
         } else {
-          RATES = {
-            'TWD_JPY':4.987,'JPY_TWD':0.2005,
-            'TWD_USD':0.03143,'USD_TWD':31.81,
-            'USD_JPY':154.2,'JPY_USD':0.00648
-          };
+          RATES = { 'TWD_JPY':4.987,'JPY_TWD':0.2005,'TWD_USD':0.03143,'USD_TWD':31.81,'USD_JPY':154.2,'JPY_USD':0.00648 };
           bar.innerHTML = `
             <div>🇺🇸 1 USD = <span>31.81</span> TWD</div>
             <div>🇹🇼 1 TWD = <span>4.987</span> JPY</div>
@@ -648,6 +609,27 @@
           .catch(err => console.log('SW 註冊失敗:', err));
       });
     }
+
+    // ✅ 接收 Service Worker 背景更新的匯率
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.addEventListener('message', event => {
+        if (event.data && event.data.type === 'FX_RATES_UPDATED') {
+          RATES = event.data.rates;
+          console.log('[FX] 背景匯率已更新:', event.data.date);
+          const bar = document.getElementById('fx-rate-bar');
+          if (bar && RATES['USD_TWD']) {
+            bar.innerHTML = `
+              <div>🇺🇸 1 USD = <span>${RATES['USD_TWD'].toFixed(2)}</span> TWD</div>
+              <div>🇹🇼 1 TWD = <span>${RATES['TWD_JPY'].toFixed(4)}</span> JPY</div>
+              <div>🇯🇵 1 JPY = <span>${RATES['JPY_TWD'].toFixed(4)}</span> TWD</div>
+              <div class="rate-update">🔄 背景自動更新 ${event.data.date} ✅</div>
+            `;
+            fxConvert();
+          }
+        }
+      });
+    }
+
   </script>
 </body>
 </html>
