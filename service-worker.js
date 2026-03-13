@@ -44,15 +44,14 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 靜態資源：Stale-While-Revalidate（先回傳快取，背景更新）
+  // 靜態資源：Stale-While-Revalidate
   event.respondWith(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.match(event.request).then((cachedResponse) => {
         const fetchPromise = fetch(event.request).then((networkResponse) => {
           cache.put(event.request, networkResponse.clone());
           return networkResponse;
-        }).catch(() => cachedResponse); // 網路失敗時回傳快取
-
+        }).catch(() => cachedResponse);
         return cachedResponse || fetchPromise;
       });
     })
@@ -80,4 +79,36 @@ self.addEventListener('notificationclick', (event) => {
   event.waitUntil(
     clients.openWindow('/tulip-calculator/calculator.html')
   );
+});
+
+// ✅ Background Sync（網路恢復時自動同步）
+self.addEventListener('sync', (event) => {
+  if (event.tag === 'sync-exchange-rate') {
+    event.waitUntil(
+      fetch('https://open.er-api.com/v6/latest/USD')
+        .then(response => response.json())
+        .then(data => {
+          console.log('[SW] Background Sync 匯率更新成功', data);
+        })
+        .catch(err => {
+          console.error('[SW] Background Sync 失敗', err);
+        })
+    );
+  }
+});
+
+// ✅ Periodic Background Sync（定期自動同步匯率）
+self.addEventListener('periodicsync', (event) => {
+  if (event.tag === 'periodic-exchange-rate') {
+    event.waitUntil(
+      fetch('https://open.er-api.com/v6/latest/USD')
+        .then(response => response.json())
+        .then(data => {
+          console.log('[SW] Periodic Sync 匯率更新成功', data);
+        })
+        .catch(err => {
+          console.error('[SW] Periodic Sync 失敗', err);
+        })
+    );
+  }
 });
