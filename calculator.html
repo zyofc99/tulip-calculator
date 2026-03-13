@@ -1,620 +1,165 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
-  <title>鬱金香計算機</title>
-  <link rel="manifest" href="/tulip-calculator/manifest.json">
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap');
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Quicksand', 'Noto Sans TC', sans-serif;
-      display: flex; justify-content: center; align-items: center;
-      min-height: 100vh;
-      overflow-y: auto;
-      background: linear-gradient(180deg,
-        #1a3a5c 0%, #2d6a8a 20%, #4a9aba 35%,
-        #87ceeb 50%, #b8e4f0 60%, #d4f0e8 75%,
-        #2d5a2d 75%, #1a3d1a 100%);
-      position: relative;
-      padding: 16px 0;
-    }
-    .sun {
-      position:fixed; width:90px; height:90px;
-      background:radial-gradient(circle,#fff9c4 0%,#ffe066 40%,#ffaa00 70%,transparent 100%);
-      border-radius:50%; top:7%; right:16%;
-      box-shadow:0 0 40px #ffe066,0 0 80px #ffcc0066;
-      animation:sun-glow 4s ease-in-out infinite alternate; z-index:1;
-    }
-    @keyframes sun-glow {
-      0%  { box-shadow:0 0 30px #ffe066,0 0 60px #ffcc0044; }
-      100%{ box-shadow:0 0 60px #ffe066,0 0 120px #ffcc0066; }
-    }
-    .cloud { position:fixed; background:rgba(255,255,255,0.85); border-radius:50px; z-index:1; animation:cloud-move linear infinite; }
-    .cloud::before,.cloud::after { content:''; position:absolute; background:rgba(255,255,255,0.85); border-radius:50%; }
-    .cloud-1 { width:100px;height:30px;top:12%;left:-120px;animation-duration:30s; }
-    .cloud-1::before{width:50px;height:50px;top:-25px;left:15px;}
-    .cloud-1::after {width:35px;height:35px;top:-15px;left:50px;}
-    .cloud-2 { width:140px;height:38px;top:18%;left:-160px;animation-duration:45s;animation-delay:-15s;opacity:0.7; }
-    .cloud-2::before{width:60px;height:60px;top:-30px;left:20px;}
-    .cloud-2::after {width:45px;height:45px;top:-20px;left:70px;}
-    .cloud-3 { width:80px;height:24px;top:8%;left:-100px;animation-duration:38s;animation-delay:-8s;opacity:0.6; }
-    .cloud-3::before{width:40px;height:40px;top:-20px;left:10px;}
-    .cloud-3::after {width:30px;height:30px;top:-12px;left:40px;}
-    @keyframes cloud-move { 0%{left:-200px;} 100%{left:110%;} }
-    .birds { position:fixed;top:20%;left:10%;z-index:2;pointer-events:none;animation:birds-fly 20s linear infinite; }
-    @keyframes birds-fly { 0%{transform:translate(0,0);}100%{transform:translate(280px,-15px);opacity:0;} }
-    .bird { display:inline-block;width:16px;height:6px;border-top:2px solid #1a2a3a;border-radius:50% 50% 0 0;margin:0 4px;animation:bird-wing 0.5s ease-in-out infinite alternate; }
-    .bird:nth-child(2){animation-delay:0.15s;margin-top:6px;}
-    .bird:nth-child(3){animation-delay:0.3s;}
-    @keyframes bird-wing{0%{transform:scaleY(1);}100%{transform:scaleY(-0.4);}}
-    .mountains{position:fixed;bottom:24%;left:0;width:100%;z-index:2;pointer-events:none;}
-    .mountains svg{width:100%;height:160px;display:block;}
-    .trees{position:fixed;bottom:0;left:0;width:100%;height:26%;z-index:3;pointer-events:none;}
-    .trees svg{width:100%;height:100%;}
-    .tulip-field{position:fixed;bottom:0;left:0;width:100%;height:22%;z-index:4;pointer-events:none;}
-    .tulip-field svg{width:100%;height:100%;}
-    #calculator {
-      position:relative; z-index:10;
-      background:rgba(255,253,231,0.90);
-      backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
-      border:1.5px solid rgba(255,235,100,0.7); border-radius:26px;
-      padding:16px 14px 14px; width:350px;
-      box-shadow:0 8px 40px rgba(180,140,0,0.18),0 2px 8px rgba(255,255,255,0.5) inset;
-    }
-    .calc-title { text-align:center;font-size:18px;font-weight:700;color:#e65100;letter-spacing:3px;margin-bottom:2px;text-shadow:0 1px 3px rgba(255,255,255,0.9); }
-    .calc-subtitle { text-align:center;font-size:9px;color:#f9a825;letter-spacing:4px;margin-bottom:10px; }
-    .tab-bar{display:flex;gap:6px;margin-bottom:10px;}
-    .tab-btn{
-      flex:1;padding:7px 4px;border:1.5px solid rgba(255,213,79,0.6);
-      border-radius:10px;font-family:'Quicksand',sans-serif;
-      font-size:12px;font-weight:700;cursor:pointer;
-      background:rgba(255,249,196,0.5);color:#a0522d;transition:all 0.2s;
-    }
-    .tab-btn.active{
-      background:linear-gradient(145deg,#f9a825,#e65100);
-      color:#fffde7;border-color:#e65100;
-      box-shadow:0 3px 10px rgba(230,81,0,0.3);
-    }
-    #display-wrapper {
-      background:linear-gradient(135deg,rgba(255,249,196,0.8),rgba(255,236,153,0.6));
-      border:1.5px solid rgba(249,168,37,0.4); border-radius:14px;
-      padding:10px 16px; margin-bottom:10px;
-      box-shadow:inset 0 2px 8px rgba(200,140,0,0.1),0 1px 3px rgba(255,255,255,0.7);
-      position:relative; overflow:hidden;
-    }
-    #display-wrapper::before{content:'🌷';position:absolute;left:10px;top:8px;font-size:16px;opacity:0.45;}
-    #display-wrapper::after {content:'🌷';position:absolute;right:10px;bottom:6px;font-size:13px;opacity:0.35;}
-    .display-label{font-size:9px;color:#e65100;letter-spacing:3px;margin-bottom:2px;text-align:right;}
-    #display {
-      width:100%; background:transparent; border:none; outline:none;
-      color:#5d3a00; font-family:'Quicksand',sans-serif;
-      font-size:42px; font-weight:700; text-align:right;
-      text-shadow:0 1px 3px rgba(180,120,0,0.2);
-      caret-color:#f9a825; line-height:1.1;
-      text-overflow:clip; white-space:nowrap; overflow:hidden;
-    }
-    #display::placeholder{color:#ffe082;}
-    #buttons { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; }
-    button {
-      padding:15px 3px; font-family:'Quicksand','Noto Sans TC',sans-serif;
-      font-size:15px; font-weight:700; border:none; cursor:pointer;
-      border-radius:13px; transition:all 0.15s ease;
-      position:relative; overflow:hidden; letter-spacing:0.3px;
-    }
-    button::after {
-      content:''; position:absolute; top:50%; left:50%;
-      width:0; height:0; background:rgba(255,255,255,0.5);
-      border-radius:50%; transform:translate(-50%,-50%);
-      transition:width 0.3s,height 0.3s,opacity 0.3s; opacity:0;
-    }
-    button:active::after{width:120px;height:120px;opacity:1;}
-    button:hover{transform:translateY(-2px);filter:brightness(1.08);}
-    button:active{transform:translateY(1px);}
-    .key-num{background:linear-gradient(145deg,#fffde7,#fff9c4);color:#5d3a00;box-shadow:0 3px 8px rgba(249,168,37,0.2),inset 0 1px 0 rgba(255,255,255,0.9);border:1px solid rgba(255,224,130,0.6);}
-    .key-op {background:linear-gradient(145deg,#e3f2fd,#bbdefb);color:#0d47a1;box-shadow:0 3px 8px rgba(33,150,243,0.15),inset 0 1px 0 rgba(255,255,255,0.8);border:1px solid rgba(100,181,246,0.4);}
-    .key-fn {background:linear-gradient(145deg,#fff8e1,#ffecb3);color:#e65100;box-shadow:0 3px 8px rgba(255,152,0,0.18),inset 0 1px 0 rgba(255,255,255,0.8);border:1px solid rgba(255,213,79,0.6);}
-    #clear   {background:linear-gradient(145deg,#ffebee,#ffcdd2);color:#b71c1c;box-shadow:0 3px 8px rgba(244,67,54,0.2),inset 0 1px 0 rgba(255,255,255,0.8);border:1px solid rgba(239,154,154,0.5);font-size:13px;}
-    #backspace{background:linear-gradient(145deg,#e3f2fd,#bbdefb);color:#0d47a1;box-shadow:0 3px 8px rgba(33,150,243,0.15),inset 0 1px 0 rgba(255,255,255,0.8);border:1px solid rgba(100,181,246,0.4);font-size:13px;}
-    #equals  {background:linear-gradient(145deg,#f9a825,#e65100);color:#fffde7;font-size:15px;font-weight:700;
-              box-shadow:0 4px 14px rgba(230,81,0,0.4),inset 0 1px 0 rgba(255,255,255,0.2);
-              border:1px solid rgba(255,183,77,0.4);text-shadow:0 1px 2px rgba(0,0,0,0.2);
-              grid-column:span 4;}
-    #equals:hover{background:linear-gradient(145deg,#ffb300,#f57c00);box-shadow:0 6px 18px rgba(230,81,0,0.55);}
-    #fx-panel{display:none;}
-    #fx-panel.active{display:block;}
-    #calc-panel.hidden{display:none;}
-    .fx-rate-bar{
-      background:linear-gradient(135deg,rgba(255,249,196,0.8),rgba(255,236,153,0.6));
-      border:1.5px solid rgba(249,168,37,0.4);border-radius:12px;
-      padding:6px 10px;margin-bottom:8px;font-size:10px;color:#a0522d;
-      display:flex;justify-content:space-between;flex-wrap:wrap;gap:2px;
-    }
-    .fx-rate-bar span{font-weight:700;color:#e65100;}
-    .fx-rate-bar .rate-update{font-size:9px;color:#bbb;width:100%;text-align:right;}
-    .fx-loading{text-align:center;font-size:11px;color:#e65100;animation:blink 1s ease-in-out infinite;}
-    @keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}
-    .fx-pair-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;}
-    .fx-pair-btn{
-      padding:6px 4px;border-radius:12px;border:2px solid rgba(255,213,79,0.5);
-      background:rgba(255,249,196,0.5);color:#a0522d;
-      font-family:'Quicksand',sans-serif;font-size:11px;font-weight:700;
-      cursor:pointer;transition:all 0.2s;text-align:center;line-height:1.4;
-    }
-    .fx-pair-btn .flag{font-size:15px;display:block;margin-bottom:1px;}
-    .fx-pair-btn.selected{
-      background:linear-gradient(145deg,#f9a825,#e65100);
-      color:#fffde7;border-color:#e65100;
-      box-shadow:0 3px 10px rgba(230,81,0,0.3);
-    }
-    .fx-pair-btn:hover{transform:translateY(-2px);filter:brightness(1.05);}
-    .fx-display-box{
-      background:linear-gradient(135deg,rgba(255,249,196,0.8),rgba(255,236,153,0.6));
-      border:1.5px solid rgba(249,168,37,0.4);border-radius:14px;
-      padding:8px 12px;margin-bottom:4px;position:relative;overflow:hidden;
-    }
-    .fx-display-box::before{content:'🌷';position:absolute;left:10px;top:8px;font-size:14px;opacity:0.35;}
-    .fx-display-label{font-size:9px;color:#e65100;letter-spacing:2px;margin-bottom:2px;text-align:right;}
-    .fx-display-row{display:flex;align-items:center;gap:8px;justify-content:flex-end;}
-    .fx-currency-tag{
-      background:linear-gradient(145deg,#f9a825,#e65100);
-      color:#fffde7;border-radius:8px;padding:3px 9px;
-      font-size:12px;font-weight:700;white-space:nowrap;
-      box-shadow:0 2px 6px rgba(230,81,0,0.3);flex-shrink:0;
-    }
-    #fx-display-val{
-      font-size:34px;font-weight:700;color:#5d3a00;
-      font-family:'Quicksand',sans-serif;
-      direction: rtl;
-      text-align:left;
-      min-width:0;
-      overflow:hidden;
-      white-space:nowrap;
-      text-overflow:clip;
-      flex:1;
-    }
-    .fx-arrow{text-align:center;font-size:16px;margin:2px 0;color:#e65100;
-      animation:bounce-arrow 1.5s ease-in-out infinite;}
-    @keyframes bounce-arrow{0%,100%{transform:translateY(0);}50%{transform:translateY(3px);}}
-    .fx-result-box{
-      background:linear-gradient(135deg,rgba(230,81,0,0.07),rgba(249,168,37,0.12));
-      border:1.5px solid rgba(249,168,37,0.5);border-radius:14px;
-      padding:8px 12px;margin-bottom:8px;position:relative;overflow:hidden;
-    }
-    .fx-result-box::before{content:'🌷';position:absolute;right:10px;top:8px;font-size:14px;opacity:0.3;}
-    .fx-result-label{font-size:9px;color:#e65100;letter-spacing:2px;margin-bottom:2px;text-align:right;}
-    .fx-result-row{display:flex;align-items:center;gap:8px;justify-content:flex-end;}
-    .fx-result-tag{
-      background:linear-gradient(145deg,#e3f2fd,#bbdefb);
-      color:#0d47a1;border-radius:8px;padding:3px 9px;
-      font-size:12px;font-weight:700;white-space:nowrap;
-      box-shadow:0 2px 6px rgba(33,150,243,0.2);flex-shrink:0;
-    }
-    #fx-result{
-      font-size:34px;font-weight:700;color:#5d3a00;
-      font-family:'Quicksand',sans-serif;text-align:right;
-      min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-      flex:1;
-    }
-    .fx-numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;}
-    .fx-key{
-      padding:12px 4px;font-family:'Quicksand',sans-serif;
-      font-size:14px;font-weight:700;border:none;cursor:pointer;
-      border-radius:11px;transition:all 0.15s ease;
-      position:relative;overflow:hidden;
-    }
-    .fx-key:hover{transform:translateY(-2px);filter:brightness(1.08);}
-    .fx-key:active{transform:translateY(1px);}
-    .fx-key::after{
-      content:'';position:absolute;top:50%;left:50%;
-      width:0;height:0;background:rgba(255,255,255,0.5);
-      border-radius:50%;transform:translate(-50%,-50%);
-      transition:width 0.3s,height 0.3s,opacity 0.3s;opacity:0;
-    }
-    .fx-key:active::after{width:100px;height:100px;opacity:1;}
-    .fx-num{background:linear-gradient(145deg,#fffde7,#fff9c4);color:#5d3a00;box-shadow:0 3px 8px rgba(249,168,37,0.2),inset 0 1px 0 rgba(255,255,255,0.9);border:1px solid rgba(255,224,130,0.6);}
-    .fx-del{background:linear-gradient(145deg,#fce4ec,#f8bbd0);color:#880e4f;box-shadow:0 3px 8px rgba(233,30,99,0.15);border:1px solid rgba(244,143,177,0.5);}
-    .fx-clr{background:linear-gradient(145deg,#ffebee,#ffcdd2);color:#b71c1c;box-shadow:0 3px 8px rgba(244,67,54,0.2);border:1px solid rgba(239,154,154,0.5);}
-    .fx-dot{background:linear-gradient(145deg,#fffde7,#fff9c4);color:#5d3a00;box-shadow:0 3px 8px rgba(249,168,37,0.2);border:1px solid rgba(255,224,130,0.6);}
-    .fx-full{grid-column:span 3;}
-    .footer-deco{text-align:center;margin-top:8px;font-size:16px;letter-spacing:5px;opacity:0.6;}
-    .petal{position:fixed;pointer-events:none;z-index:5;animation:petal-fall linear infinite;opacity:0.85;font-size:14px;}
-    @keyframes petal-fall {
-      0%  {transform:translateY(-20px) rotate(0deg) translateX(0);opacity:0;}
-      10% {opacity:0.85;}
-      50% {transform:translateY(50vh) rotate(180deg) translateX(30px);}
-      90% {opacity:0.6;}
-      100%{transform:translateY(105vh) rotate(360deg) translateX(-20px);opacity:0;}
-    }
-  </style>
-</head>
-<body>
-  <div class="sun"></div>
-  <div class="cloud cloud-1"></div>
-  <div class="cloud cloud-2"></div>
-  <div class="cloud cloud-3"></div>
-  <div class="birds"><div class="bird"></div><div class="bird"></div><div class="bird"></div></div>
-  <div class="mountains">
-    <svg viewBox="0 0 1200 160" preserveAspectRatio="none">
-      <polygon points="0,160 150,40 300,160" fill="#4a7a5a" opacity="0.6"/>
-      <polygon points="100,160 280,20 460,160" fill="#3d6b4a" opacity="0.8"/>
-      <polygon points="300,160 500,50 700,160" fill="#5a8a6a" opacity="0.7"/>
-      <polygon points="500,160 700,30 900,160" fill="#3a6040" opacity="0.9"/>
-      <polygon points="700,160 900,60 1100,160" fill="#4d7a5a" opacity="0.75"/>
-      <polygon points="900,160 1080,45 1200,160" fill="#3d6a4a" opacity="0.85"/>
-      <polygon points="270,20 280,8 290,20" fill="rgba(255,255,255,0.7)"/>
-      <polygon points="690,30 700,15 710,30" fill="rgba(255,255,255,0.7)"/>
-      <polygon points="1070,45 1080,28 1090,45" fill="rgba(255,255,255,0.6)"/>
-    </svg>
-  </div>
-  <div class="trees">
-    <svg viewBox="0 0 1200 200" preserveAspectRatio="none">
-      <rect x="0" y="120" width="1200" height="80" fill="#2d5a2d"/>
-      <g fill="#1a4a1a">
-        <polygon points="30,120 55,50 80,120"/><polygon points="20,120 55,70 90,120" opacity="0.7"/>
-        <polygon points="100,120 130,55 160,120"/><polygon points="200,120 225,45 250,120"/>
-        <polygon points="350,120 380,60 410,120"/><polygon points="500,120 530,50 560,120"/>
-        <polygon points="650,120 680,55 710,120"/><polygon points="800,120 830,48 860,120"/>
-        <polygon points="950,120 980,52 1010,120"/><polygon points="1080,120 1110,58 1140,120"/>
-      </g>
-    </svg>
-  </div>
-  <div class="tulip-field">
-    <svg viewBox="0 0 1200 180" preserveAspectRatio="none">
-      <rect x="0" y="100" width="1200" height="80" fill="#3a7a3a"/>
-      <g><rect x="58"   y="80" width="4" height="30" fill="#4a8a3a"/><ellipse cx="60"   cy="72" rx="10" ry="14" fill="#fdd835"/><ellipse cx="55"   cy="78" rx="7" ry="10" fill="#ffee58"/><ellipse cx="65"   cy="78" rx="7" ry="10" fill="#f9a825"/></g>
-      <g><rect x="158"  y="75" width="4" height="35" fill="#4a8a3a"/><ellipse cx="160"  cy="67" rx="10" ry="14" fill="#ffb300"/><ellipse cx="155"  cy="73" rx="7" ry="10" fill="#ffd54f"/><ellipse cx="165"  cy="73" rx="7" ry="10" fill="#ff8f00"/></g>
-      <g><rect x="258"  y="78" width="4" height="32" fill="#4a8a3a"/><ellipse cx="260"  cy="70" rx="10" ry="14" fill="#fdd835"/><ellipse cx="255"  cy="76" rx="7" ry="10" fill="#ffee58"/><ellipse cx="265"  cy="76" rx="7" ry="10" fill="#f9a825"/></g>
-      <g><rect x="358"  y="76" width="4" height="34" fill="#4a8a3a"/><ellipse cx="360"  cy="68" rx="10" ry="14" fill="#ffe082"/><ellipse cx="355"  cy="74" rx="7" ry="10" fill="#fff176"/><ellipse cx="365"  cy="74" rx="7" ry="10" fill="#ffca28"/></g>
-      <g><rect x="458"  y="79" width="4" height="31" fill="#4a8a3a"/><ellipse cx="460"  cy="71" rx="10" ry="14" fill="#ffb300"/><ellipse cx="455"  cy="77" rx="7" ry="10" fill="#ffd54f"/><ellipse cx="465"  cy="77" rx="7" ry="10" fill="#ff8f00"/></g>
-      <g><rect x="558"  y="77" width="4" height="33" fill="#4a8a3a"/><ellipse cx="560"  cy="69" rx="10" ry="14" fill="#fdd835"/><ellipse cx="555"  cy="75" rx="7" ry="10" fill="#ffee58"/><ellipse cx="565"  cy="75" rx="7" ry="10" fill="#f9a825"/></g>
-      <g><rect x="658"  y="80" width="4" height="30" fill="#4a8a3a"/><ellipse cx="660"  cy="72" rx="10" ry="14" fill="#ffe082"/><ellipse cx="655"  cy="78" rx="7" ry="10" fill="#fff176"/><ellipse cx="665"  cy="78" rx="7" ry="10" fill="#ffca28"/></g>
-      <g><rect x="758"  y="76" width="4" height="34" fill="#4a8a3a"/><ellipse cx="760"  cy="68" rx="10" ry="14" fill="#fdd835"/><ellipse cx="755"  cy="74" rx="7" ry="10" fill="#ffee58"/><ellipse cx="765"  cy="74" rx="7" ry="10" fill="#f9a825"/></g>
-      <g><rect x="858"  y="78" width="4" height="32" fill="#4a8a3a"/><ellipse cx="860"  cy="70" rx="10" ry="14" fill="#ffb300"/><ellipse cx="855"  cy="76" rx="7" ry="10" fill="#ffd54f"/><ellipse cx="865"  cy="76" rx="7" ry="10" fill="#ff8f00"/></g>
-      <g><rect x="958"  y="75" width="4" height="35" fill="#4a8a3a"/><ellipse cx="960"  cy="67" rx="10" ry="14" fill="#ffe082"/><ellipse cx="955"  cy="73" rx="7" ry="10" fill="#fff176"/><ellipse cx="965"  cy="73" rx="7" ry="10" fill="#ffca28"/></g>
-      <g><rect x="1098" y="77" width="4" height="33" fill="#4a8a3a"/><ellipse cx="1100" cy="69" rx="10" ry="14" fill="#fdd835"/><ellipse cx="1095" cy="75" rx="7" ry="10" fill="#ffee58"/><ellipse cx="1105" cy="75" rx="7" ry="10" fill="#f9a825"/></g>
-    </svg>
-  </div>
-  <div id="petals-container"></div>
+/* ══ 即時匯率（多 API 備援 + Timeout + localStorage 快取）══ */
+let RATES = {};
+let fxFrom = 'TWD', fxTo = 'JPY', fxExpr = '';
 
-  <div id="calculator">
-    <div class="calc-title">🌷 鬱金香計算機 🌷</div>
-    <div class="calc-subtitle">✦ 數字與花香的和諧 ✦</div>
-    <div class="tab-bar">
-      <button class="tab-btn active" id="tab-calc" onclick="switchTab('calc')">🔢 計算機</button>
-      <button class="tab-btn" id="tab-fx" onclick="switchTab('fx')">💱 匯率換算</button>
-    </div>
+function fetchWithTimeout(url, options = {}, ms = 8000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), ms);
+  return fetch(url, { ...options, signal: controller.signal })
+    .finally(() => clearTimeout(timer));
+}
 
-    <!-- 計算機面板 -->
-    <div id="calc-panel">
-      <div id="display-wrapper">
-        <div class="display-label">輸入算式</div>
-        <input type="text" id="display" placeholder="0" readonly>
-      </div>
-      <div id="buttons">
-        <button class="key-num" onclick="appendToDisplay('(')">(</button>
-        <button class="key-num" onclick="appendToDisplay(')')">)</button>
-        <button id="clear"     onclick="clearDisplay()">🌷 清除</button>
-        <button id="backspace" onclick="backspace()">⌫ 退格</button>
-        <button class="key-num" onclick="appendToDisplay('7')">7</button>
-        <button class="key-num" onclick="appendToDisplay('8')">8</button>
-        <button class="key-num" onclick="appendToDisplay('9')">9</button>
-        <button class="key-op"  onclick="appendToDisplay('/')">÷</button>
-        <button class="key-num" onclick="appendToDisplay('4')">4</button>
-        <button class="key-num" onclick="appendToDisplay('5')">5</button>
-        <button class="key-num" onclick="appendToDisplay('6')">6</button>
-        <button class="key-op"  onclick="appendToDisplay('*')">×</button>
-        <button class="key-num" onclick="appendToDisplay('1')">1</button>
-        <button class="key-num" onclick="appendToDisplay('2')">2</button>
-        <button class="key-num" onclick="appendToDisplay('3')">3</button>
-        <button class="key-op"  onclick="appendToDisplay('-')">−</button>
-        <button class="key-fn"  onclick="toggleSign()">±</button>
-        <button class="key-num" onclick="appendToDisplay('0')">0</button>
-        <button class="key-num" onclick="appendToDisplay('.')">.</button>
-        <button class="key-op"  onclick="appendToDisplay('+')">+</button>
-        <button id="equals" onclick="calculate()">🌷 =</button>
-      </div>
-    </div>
+// ✅ API 1：Frankfurter
+async function fetchFromFrankfurter() {
+  const res = await fetchWithTimeout(
+    'https://api.frankfurter.app/latest?from=USD&to=TWD,JPY',
+    { cache: 'no-store' }, 8000
+  );
+  if (!res.ok) throw new Error('Frankfurter HTTP ' + res.status);
+  const data = await res.json();
+  if (!data.rates) throw new Error('Frankfurter 無 rates');
+  return { usdTwd: data.rates['TWD'], usdJpy: data.rates['JPY'], date: data.date };
+}
 
-    <!-- 匯率換算面板 -->
-    <div id="fx-panel">
-      <div class="fx-rate-bar" id="fx-rate-bar">
-        <div class="fx-loading" style="width:100%;text-align:center;">🌷 匯率載入中...</div>
-      </div>
-      <div class="fx-pair-grid">
-        <button class="fx-pair-btn selected" onclick="selectPair('TWD','JPY')" id="btn-twd-jpy">
-          <span class="flag">🇹🇼→🇯🇵</span>台幣 → 日幣
-        </button>
-        <button class="fx-pair-btn" onclick="selectPair('JPY','TWD')" id="btn-jpy-twd">
-          <span class="flag">🇯🇵→🇹🇼</span>日幣 → 台幣
-        </button>
-        <button class="fx-pair-btn" onclick="selectPair('TWD','USD')" id="btn-twd-usd">
-          <span class="flag">🇹🇼→🇺🇸</span>台幣 → 美元
-        </button>
-        <button class="fx-pair-btn" onclick="selectPair('USD','TWD')" id="btn-usd-twd">
-          <span class="flag">🇺🇸→🇹🇼</span>美元 → 台幣
-        </button>
-      </div>
-      <div class="fx-display-box">
-        <div class="fx-display-label">✦ 輸入金額 ✦</div>
-        <div class="fx-display-row">
-          <div class="fx-currency-tag" id="fx-from-tag">TWD</div>
-          <div id="fx-display-val">0</div>
-        </div>
-      </div>
-      <div class="fx-arrow">⬇️</div>
-      <div class="fx-result-box">
-        <div class="fx-result-label">✦ 換算結果 ✦</div>
-        <div class="fx-result-row">
-          <div class="fx-result-tag" id="fx-to-tag">JPY</div>
-          <div id="fx-result">—</div>
-        </div>
-      </div>
-      <div class="fx-numpad">
-        <button class="fx-key fx-num" onclick="fxKey('7')">7</button>
-        <button class="fx-key fx-num" onclick="fxKey('8')">8</button>
-        <button class="fx-key fx-num" onclick="fxKey('9')">9</button>
-        <button class="fx-key fx-num" onclick="fxKey('4')">4</button>
-        <button class="fx-key fx-num" onclick="fxKey('5')">5</button>
-        <button class="fx-key fx-num" onclick="fxKey('6')">6</button>
-        <button class="fx-key fx-num" onclick="fxKey('1')">1</button>
-        <button class="fx-key fx-num" onclick="fxKey('2')">2</button>
-        <button class="fx-key fx-num" onclick="fxKey('3')">3</button>
-        <button class="fx-key fx-del" onclick="fxDel()">⌫</button>
-        <button class="fx-key fx-num" onclick="fxKey('0')">0</button>
-        <button class="fx-key fx-dot" onclick="fxKey('.')">.</button>
-        <button class="fx-key fx-clr fx-full" onclick="fxClear()">AC 清除</button>
-      </div>
-    </div>
+// ✅ API 2：OpenER
+async function fetchFromOpenER() {
+  const res = await fetchWithTimeout(
+    'https://open.er-api.com/v6/latest/USD',
+    { cache: 'no-store' }, 8000
+  );
+  if (!res.ok) throw new Error('OpenER HTTP ' + res.status);
+  const data = await res.json();
+  if (data.result !== 'success') throw new Error('OpenER result 非 success');
+  const utcDate = new Date(data.time_last_update_utc);
+  const twDate  = new Date(utcDate.getTime() + 8 * 60 * 60 * 1000);
+  const date = `${twDate.getFullYear()}/${String(twDate.getMonth()+1).padStart(2,'0')}/${String(twDate.getDate()).padStart(2,'0')}`;
+  return { usdTwd: data.rates['TWD'], usdJpy: data.rates['JPY'], date };
+}
 
-    <div class="footer-deco">🌷 🌼 🌻 🌼 🌷</div>
-  </div>
+// ✅ API 3：ExchangeRate-API
+async function fetchFromExchangeRate() {
+  const res = await fetchWithTimeout(
+    'https://api.exchangerate-api.com/v4/latest/USD',
+    { cache: 'no-store' }, 8000
+  );
+  if (!res.ok) throw new Error('ExchangeRate HTTP ' + res.status);
+  const data = await res.json();
+  if (!data.rates) throw new Error('ExchangeRate 無 rates');
+  return { usdTwd: data.rates['TWD'], usdJpy: data.rates['JPY'], date: data.date };
+}
 
-  <script>
-    /* ══ 落花 ══ */
-    const petalsEmoji = ['🌷','🌼','🌻','✨','🌾'];
-    const petalContainer = document.getElementById('petals-container');
-    function createPetal() {
-      const p = document.createElement('div');
-      p.classList.add('petal');
-      p.textContent = petalsEmoji[Math.floor(Math.random()*petalsEmoji.length)];
-      p.style.left = Math.random()*100 + 'vw';
-      p.style.animationDuration = (7 + Math.random()*8) + 's';
-      p.style.animationDelay    = (Math.random()*4) + 's';
-      p.style.fontSize = (11 + Math.random()*10) + 'px';
-      petalContainer.appendChild(p);
-      setTimeout(() => p.remove(), 18000);
+// ✅ API 4：Fawaz Ahmed（GitHub CDN，台灣可用）
+async function fetchFromFawaz() {
+  const res = await fetchWithTimeout(
+    'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json',
+    { cache: 'no-store' }, 8000
+  );
+  if (!res.ok) throw new Error('Fawaz HTTP ' + res.status);
+  const data = await res.json();
+  if (!data.usd) throw new Error('Fawaz 無 usd');
+  const usdTwd = data.usd['twd'];
+  const usdJpy = data.usd['jpy'];
+  if (!usdTwd || !usdJpy) throw new Error('Fawaz 缺少幣別');
+  const today = new Date();
+  const date = `${today.getFullYear()}/${String(today.getMonth()+1).padStart(2,'0')}/${String(today.getDate()).padStart(2,'0')}`;
+  return { usdTwd, usdJpy, date };
+}
+
+// ✅ API 5：Fawaz Ahmed 備援鏡像
+async function fetchFromFawazMirror() {
+  const today = new Date();
+  const dateStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+  const res = await fetchWithTimeout(
+    `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@${dateStr}/v1/currencies/usd.json`,
+    { cache: 'no-store' }, 8000
+  );
+  if (!res.ok) throw new Error('FawazMirror HTTP ' + res.status);
+  const data = await res.json();
+  if (!data.usd) throw new Error('FawazMirror 無 usd');
+  const usdTwd = data.usd['twd'];
+  const usdJpy = data.usd['jpy'];
+  if (!usdTwd || !usdJpy) throw new Error('FawazMirror 缺少幣別');
+  const date = `${today.getFullYear()}/${String(today.getMonth()+1).padStart(2,'0')}/${String(today.getDate()).padStart(2,'0')}`;
+  return { usdTwd, usdJpy, date };
+}
+
+// ✅ 主函式
+async function fetchRates() {
+  const bar = document.getElementById('fx-rate-bar');
+  bar.innerHTML = `<div class="fx-loading" style="width:100%;text-align:center;">🌷 匯率載入中...</div>`;
+  let result = null;
+
+  const apis = [
+    { fn: fetchFromFawaz,        name: 'Fawaz(jsdelivr)'  },
+    { fn: fetchFromFawazMirror,  name: 'FawazMirror'      },
+    { fn: fetchFromFrankfurter,  name: 'Frankfurter'      },
+    { fn: fetchFromOpenER,       name: 'OpenER'           },
+    { fn: fetchFromExchangeRate, name: 'ExchangeRate'     }
+  ];
+
+  for (const api of apis) {
+    try {
+      result = await api.fn();
+      if (result) { console.log('[FX] 成功來源:', api.name); break; }
+    } catch(e) {
+      console.warn('[FX]', api.name, '失敗:', e.message);
     }
-    for (let i = 0; i < 10; i++) setTimeout(createPetal, i*1000);
-    setInterval(createPetal, 1800);
+  }
 
-    /* ══ 計算機 ══ */
-    const display = document.getElementById('display');
-    function scrollToEnd() { display.scrollLeft = display.scrollWidth; }
-    function appendToDisplay(v) {
-      if(display.value==='錯誤') display.value='';
-      display.value += v; scrollToEnd();
+  if (result) {
+    const { usdTwd, usdJpy, date } = result;
+    RATES['USD_TWD'] = usdTwd;
+    RATES['TWD_USD'] = 1 / usdTwd;
+    RATES['USD_JPY'] = usdJpy;
+    RATES['JPY_USD'] = 1 / usdJpy;
+    RATES['TWD_JPY'] = usdJpy / usdTwd;
+    RATES['JPY_TWD'] = usdTwd / usdJpy;
+
+    try {
+      localStorage.setItem('lastRates', JSON.stringify(RATES));
+      localStorage.setItem('lastRateDate', String(date));
+    } catch(e) {}
+
+    const dateStr = typeof date === 'string' && date.includes('-')
+      ? date.replace(/-/g, '/') : String(date);
+
+    bar.innerHTML = `
+      <div>🇺🇸 1 USD = <span>${usdTwd.toFixed(2)}</span> TWD</div>
+      <div>🇹🇼 1 TWD = <span>${RATES['TWD_JPY'].toFixed(4)}</span> JPY</div>
+      <div>🇯🇵 1 JPY = <span>${RATES['JPY_TWD'].toFixed(4)}</span> TWD</div>
+      <div class="rate-update">📅 即時匯率 ${dateStr} ✅</div>
+    `;
+  } else {
+    // 先試 localStorage 快取
+    let cached = null, cachedDate = '';
+    try {
+      const raw = localStorage.getItem('lastRates');
+      if (raw) cached = JSON.parse(raw);
+      cachedDate = localStorage.getItem('lastRateDate') || '';
+    } catch(e) {}
+
+    if (cached) {
+      RATES = cached;
+      bar.innerHTML = `
+        <div>🇺🇸 1 USD = <span>${(RATES['USD_TWD']||0).toFixed(2)}</span> TWD</div>
+        <div>🇹🇼 1 TWD = <span>${(RATES['TWD_JPY']||0).toFixed(4)}</span> JPY</div>
+        <div>🇯🇵 1 JPY = <span>${(RATES['JPY_TWD']||0).toFixed(4)}</span> TWD</div>
+        <div class="rate-update">📦 上次快取匯率 ${cachedDate} ⚠️</div>
+      `;
+    } else {
+      RATES = {
+        'TWD_JPY':4.987,'JPY_TWD':0.2005,
+        'TWD_USD':0.03143,'USD_TWD':31.81,
+        'USD_JPY':154.2,'JPY_USD':0.00648
+      };
+      bar.innerHTML = `
+        <div>🇺🇸 1 USD = <span>31.81</span> TWD</div>
+        <div>🇹🇼 1 TWD = <span>4.987</span> JPY</div>
+        <div>🇯🇵 1 JPY = <span>0.2005</span> TWD</div>
+        <div class="rate-update">⚠️ 網路異常，使用備用匯率</div>
+      `;
     }
-    function clearDisplay() { display.value=''; }
-    function backspace() { display.value = display.value.slice(0,-1); scrollToEnd(); }
-    function toggleSign() {
-      if(!display.value) return;
-      display.value = display.value.startsWith('-') ? display.value.slice(1) : '-'+display.value;
-      scrollToEnd();
-    }
-    function calculate() {
-      try {
-        let e = display.value.replace(/×/g,'*').replace(/÷/g,'/').replace(/−/g,'-');
-        display.value = parseFloat(eval(e).toPrecision(10)); scrollToEnd();
-      } catch { display.value='錯誤'; }
-    }
-
-    /* ══ 即時匯率（多 API 備援 + Timeout + localStorage 快取）══ */
-    let RATES = {};
-    let fxFrom = 'TWD', fxTo = 'JPY', fxExpr = '';
-
-    // ✅ Timeout 包裝
-    function fetchWithTimeout(url, options = {}, ms = 8000) {
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), ms);
-      return fetch(url, { ...options, signal: controller.signal })
-        .finally(() => clearTimeout(timer));
-    }
-
-    // ✅ API 1：Frankfurter
-    async function fetchFromFrankfurter() {
-      const res = await fetchWithTimeout(
-        'https://api.frankfurter.app/latest?from=USD&to=TWD,JPY',
-        { cache: 'no-store' }, 8000
-      );
-      if (!res.ok) throw new Error('Frankfurter HTTP ' + res.status);
-      const data = await res.json();
-      if (!data.rates) throw new Error('Frankfurter 無 rates');
-      return { usdTwd: data.rates['TWD'], usdJpy: data.rates['JPY'], date: data.date };
-    }
-
-    // ✅ API 2：OpenER
-    async function fetchFromOpenER() {
-      const res = await fetchWithTimeout(
-        'https://open.er-api.com/v6/latest/USD',
-        { cache: 'no-store' }, 8000
-      );
-      if (!res.ok) throw new Error('OpenER HTTP ' + res.status);
-      const data = await res.json();
-      if (data.result !== 'success') throw new Error('OpenER result 非 success');
-      const utcDate = new Date(data.time_last_update_utc);
-      const twDate  = new Date(utcDate.getTime() + 8 * 60 * 60 * 1000);
-      const date = `${twDate.getFullYear()}/${String(twDate.getMonth()+1).padStart(2,'0')}/${String(twDate.getDate()).padStart(2,'0')}`;
-      return { usdTwd: data.rates['TWD'], usdJpy: data.rates['JPY'], date };
-    }
-
-    // ✅ API 3：ExchangeRate-API（第三備援）
-    async function fetchFromExchangeRate() {
-      const res = await fetchWithTimeout(
-        'https://api.exchangerate-api.com/v4/latest/USD',
-        { cache: 'no-store' }, 8000
-      );
-      if (!res.ok) throw new Error('ExchangeRate HTTP ' + res.status);
-      const data = await res.json();
-      if (!data.rates) throw new Error('ExchangeRate 無 rates');
-      return { usdTwd: data.rates['TWD'], usdJpy: data.rates['JPY'], date: data.date };
-    }
-
-    // ✅ 主函式
-    async function fetchRates() {
-      const bar = document.getElementById('fx-rate-bar');
-      bar.innerHTML = `<div class="fx-loading" style="width:100%;text-align:center;">🌷 匯率載入中...</div>`;
-      let result = null;
-
-      const apis = [
-        { fn: fetchFromFrankfurter, name: 'Frankfurter'  },
-        { fn: fetchFromOpenER,      name: 'OpenER'        },
-        { fn: fetchFromExchangeRate,name: 'ExchangeRate'  }
-      ];
-
-      for (const api of apis) {
-        try {
-          result = await api.fn();
-          if (result) { console.log('[FX] 成功來源:', api.name); break; }
-        } catch(e) {
-          console.warn('[FX]', api.name, '失敗:', e.message);
-        }
-      }
-
-      if (result) {
-        const { usdTwd, usdJpy, date } = result;
-        RATES['USD_TWD'] = usdTwd;
-        RATES['TWD_USD'] = 1 / usdTwd;
-        RATES['USD_JPY'] = usdJpy;
-        RATES['JPY_USD'] = 1 / usdJpy;
-        RATES['TWD_JPY'] = usdJpy / usdTwd;
-        RATES['JPY_TWD'] = usdTwd / usdJpy;
-
-        // 存 localStorage 備用
-        try {
-          localStorage.setItem('lastRates', JSON.stringify(RATES));
-          localStorage.setItem('lastRateDate', String(date));
-        } catch(e) {}
-
-        const dateStr = typeof date === 'string' && date.includes('-')
-          ? date.replace(/-/g, '/') : String(date);
-
-        bar.innerHTML = `
-          <div>🇺🇸 1 USD = <span>${usdTwd.toFixed(2)}</span> TWD</div>
-          <div>🇹🇼 1 TWD = <span>${RATES['TWD_JPY'].toFixed(4)}</span> JPY</div>
-          <div>🇯🇵 1 JPY = <span>${RATES['JPY_TWD'].toFixed(4)}</span> TWD</div>
-          <div class="rate-update">📅 即時匯率 ${dateStr} ✅</div>
-        `;
-      } else {
-        // 先試 localStorage 快取
-        let cached = null, cachedDate = '';
-        try {
-          const raw = localStorage.getItem('lastRates');
-          if (raw) cached = JSON.parse(raw);
-          cachedDate = localStorage.getItem('lastRateDate') || '';
-        } catch(e) {}
-
-        if (cached) {
-          RATES = cached;
-          bar.innerHTML = `
-            <div>🇺🇸 1 USD = <span>${(RATES['USD_TWD']||0).toFixed(2)}</span> TWD</div>
-            <div>🇹🇼 1 TWD = <span>${(RATES['TWD_JPY']||0).toFixed(4)}</span> JPY</div>
-            <div>🇯🇵 1 JPY = <span>${(RATES['JPY_TWD']||0).toFixed(4)}</span> TWD</div>
-            <div class="rate-update">📦 上次快取匯率 ${cachedDate} ⚠️</div>
-          `;
-        } else {
-          // 最終靜態備用
-          RATES = {
-            'TWD_JPY':4.987,'JPY_TWD':0.2005,
-            'TWD_USD':0.03143,'USD_TWD':31.81,
-            'USD_JPY':154.2,'JPY_USD':0.00648
-          };
-          bar.innerHTML = `
-            <div>🇺🇸 1 USD = <span>31.81</span> TWD</div>
-            <div>🇹🇼 1 TWD = <span>4.987</span> JPY</div>
-            <div>🇯🇵 1 JPY = <span>0.2005</span> TWD</div>
-            <div class="rate-update">⚠️ 網路異常，使用備用匯率</div>
-          `;
-        }
-      }
-      fxConvert();
-    }
-    fetchRates();
-
-    function selectPair(from, to) {
-      fxFrom = from; fxTo = to;
-      document.getElementById('fx-from-tag').textContent = from;
-      document.getElementById('fx-to-tag').textContent   = to;
-      document.querySelectorAll('.fx-pair-btn').forEach(b => b.classList.remove('selected'));
-      const el = document.getElementById('btn-' + from.toLowerCase() + '-' + to.toLowerCase());
-      if (el) el.classList.add('selected');
-      fxClear();
-    }
-    function fxKey(v) {
-      if (v === '.' && fxExpr.includes('.')) return;
-      if (fxExpr === '0' && v !== '.') fxExpr = v;
-      else fxExpr += v;
-      updateFxDisplay(); fxConvert();
-    }
-    function fxDel()   { fxExpr = fxExpr.slice(0,-1); updateFxDisplay(); fxConvert(); }
-    function fxClear() {
-      fxExpr = '';
-      document.getElementById('fx-display-val').textContent = '0';
-      document.getElementById('fx-result').textContent = '—';
-    }
-    function updateFxDisplay() {
-      document.getElementById('fx-display-val').textContent = fxExpr || '0';
-    }
-    function fxConvert() {
-      const amt = parseFloat(fxExpr);
-      if (isNaN(amt) || fxExpr === '') { document.getElementById('fx-result').textContent = '—'; return; }
-      const rate = RATES[fxFrom + '_' + fxTo];
-      if (!rate) { document.getElementById('fx-result').textContent = '—'; return; }
-      const result = amt * rate;
-      let fmt;
-      if      (fxTo === 'JPY') fmt = Math.round(result).toLocaleString() + ' ¥';
-      else if (fxTo === 'USD') fmt = '$ ' + result.toFixed(2);
-      else                     fmt = 'NT$ ' + result.toFixed(2);
-      document.getElementById('fx-result').textContent = fmt;
-    }
-
-    /* ══ Tab 切換 ══ */
-    function switchTab(tab) {
-      const cp = document.getElementById('calc-panel');
-      const fp = document.getElementById('fx-panel');
-      const tc = document.getElementById('tab-calc');
-      const tf = document.getElementById('tab-fx');
-      if (tab === 'calc') {
-        cp.classList.remove('hidden'); fp.classList.remove('active');
-        tc.classList.add('active');    tf.classList.remove('active');
-      } else {
-        cp.classList.add('hidden');    fp.classList.add('active');
-        tc.classList.remove('active'); tf.classList.add('active');
-        fetchRates();
-      }
-    }
-
-    /* ══ Service Worker 註冊 ══ */
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/tulip-calculator/service-worker.js')
-          .then(reg => {
-            reg.onupdatefound = () => {
-              const newWorker = reg.installing;
-              newWorker.onstatechange = () => {
-                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                  window.location.reload();
-                }
-              };
-            };
-          })
-          .catch(err => console.log('SW 註冊失敗:', err));
-      });
-    }
-  </script>
-</body>
-</html>
+  }
+  fxConvert();
+}
+fetchRates();
