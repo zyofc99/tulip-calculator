@@ -14,14 +14,12 @@
     body {
       font-family: 'Quicksand', 'Noto Sans TC', sans-serif;
       display: flex; justify-content: center; align-items: center;
-      min-height: 100vh;
-      overflow-y: auto;
+      min-height: 100vh; overflow-y: auto;
       background: linear-gradient(180deg,
         #1a3a5c 0%, #2d6a8a 20%, #4a9aba 35%,
         #87ceeb 50%, #b8e4f0 60%, #d4f0e8 75%,
         #2d5a2d 75%, #1a3d1a 100%);
-      position: relative;
-      padding: 16px 0;
+      position: relative; padding: 16px 0;
     }
     .sun {
       position:fixed; width:90px; height:90px;
@@ -169,13 +167,8 @@
     #fx-display-val{
       font-size:34px;font-weight:700;color:#5d3a00;
       font-family:'Quicksand',sans-serif;
-      direction: rtl;
-      text-align:left;
-      min-width:0;
-      overflow:hidden;
-      white-space:nowrap;
-      text-overflow:clip;
-      flex:1;
+      direction:rtl; text-align:left;
+      min-width:0; overflow:hidden; white-space:nowrap; text-overflow:clip; flex:1;
     }
     .fx-arrow{text-align:center;font-size:16px;margin:2px 0;color:#e65100;
       animation:bounce-arrow 1.5s ease-in-out infinite;}
@@ -187,19 +180,34 @@
     }
     .fx-result-box::before{content:'🌷';position:absolute;right:10px;top:8px;font-size:14px;opacity:0.3;}
     .fx-result-label{font-size:9px;color:#e65100;letter-spacing:2px;margin-bottom:2px;text-align:right;}
-    .fx-result-row{display:flex;align-items:center;gap:8px;justify-content:flex-end;}
+    .fx-result-row{display:flex;align-items:center;gap:8px;justify-content:flex-end;overflow:hidden;}
     .fx-result-tag{
       background:linear-gradient(145deg,#e3f2fd,#bbdefb);
       color:#0d47a1;border-radius:8px;padding:3px 9px;
       font-size:12px;font-weight:700;white-space:nowrap;
       box-shadow:0 2px 6px rgba(33,150,243,0.2);flex-shrink:0;
     }
-    #fx-result{
+
+    /* ✅ 修正：換算結果可橫向拖拉捲動 */
+    #fx-result {
       font-size:34px;font-weight:700;color:#5d3a00;
-      font-family:'Quicksand',sans-serif;text-align:right;
-      min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+      font-family:'Quicksand',sans-serif;
+      text-align:right;
+      white-space:nowrap;
+      min-width:0;
       flex:1;
+      overflow-x:auto;
+      overflow-y:hidden;
+      text-overflow:clip;
+      -webkit-overflow-scrolling:touch;
+      cursor:grab;
+      scrollbar-width:none;        /* Firefox 隱藏捲軸 */
+      -ms-overflow-style:none;     /* IE 隱藏捲軸 */
+      direction:rtl;               /* 預設顯示最右側（最新數字） */
     }
+    #fx-result::-webkit-scrollbar { display:none; } /* Chrome/Safari 隱藏捲軸 */
+    #fx-result:active { cursor:grabbing; }
+
     .fx-numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;}
     .fx-key{
       padding:12px 4px;font-family:'Quicksand',sans-serif;
@@ -289,7 +297,6 @@
       <button class="tab-btn" id="tab-fx" onclick="switchTab('fx')">💱 匯率換算</button>
     </div>
 
-    <!-- 計算機面板 -->
     <div id="calc-panel">
       <div id="display-wrapper">
         <div class="display-label">輸入算式</div>
@@ -320,7 +327,6 @@
       </div>
     </div>
 
-    <!-- 匯率換算面板 -->
     <div id="fx-panel">
       <div class="fx-rate-bar" id="fx-rate-bar">
         <div class="fx-loading" style="width:100%;text-align:center;">🌷 匯率載入中...</div>
@@ -413,7 +419,7 @@
       } catch { display.value='錯誤'; }
     }
 
-    /* ══ 即時匯率（多 API 備援 + Timeout + localStorage 快取）══ */
+    /* ══ 即時匯率 ══ */
     let RATES = {};
     let fxFrom = 'TWD', fxTo = 'JPY', fxExpr = '';
 
@@ -423,7 +429,6 @@
       return fetch(url, { ...options, signal: controller.signal })
         .finally(() => clearTimeout(timer));
     }
-
     async function fetchFromFawaz() {
       const res = await fetchWithTimeout('https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json',{ cache: 'no-store' }, 8000);
       if (!res.ok) throw new Error('Fawaz HTTP ' + res.status);
@@ -563,17 +568,22 @@
     function updateFxDisplay() {
       document.getElementById('fx-display-val').textContent = fxExpr || '0';
     }
+
+    /* ✅ 修正：fxConvert 更新後自動捲到最右側顯示最新數字 */
     function fxConvert() {
+      const el = document.getElementById('fx-result');
       const amt = parseFloat(fxExpr);
-      if (isNaN(amt) || fxExpr === '') { document.getElementById('fx-result').textContent = '—'; return; }
+      if (isNaN(amt) || fxExpr === '') { el.textContent = '—'; return; }
       const rate = RATES[fxFrom + '_' + fxTo];
-      if (!rate) { document.getElementById('fx-result').textContent = '—'; return; }
+      if (!rate) { el.textContent = '—'; return; }
       const result = amt * rate;
       let fmt;
       if      (fxTo === 'JPY') fmt = Math.round(result).toLocaleString() + ' ¥';
       else if (fxTo === 'USD') fmt = '$ ' + result.toFixed(2);
       else                     fmt = 'NT$ ' + result.toFixed(2);
-      document.getElementById('fx-result').textContent = fmt;
+      el.textContent = fmt;
+      // ✅ 自動捲到最右側（direction:rtl 已處理，這裡補保險）
+      el.scrollLeft = el.scrollWidth;
     }
 
     /* ══ Tab 切換 ══ */
@@ -597,21 +607,20 @@
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('/tulip-calculator/service-worker.js')
           .then(reg => {
-            reg.onupdatefound = () => {
+            reg.addEventListener('updatefound', () => {
               const newWorker = reg.installing;
-              newWorker.onstatechange = () => {
+              newWorker.addEventListener('statechange', () => {
                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  console.log('[SW] 新版本已就緒，即將重新載入...');
                   window.location.reload();
                 }
-              };
-            };
+              });
+            });
           })
           .catch(err => console.log('SW 註冊失敗:', err));
       });
-    }
 
-    // ✅ 接收 Service Worker 背景更新的匯率
-    if ('serviceWorker' in navigator) {
+      /* ✅ 接收 Service Worker 背景更新的匯率 */
       navigator.serviceWorker.addEventListener('message', event => {
         if (event.data && event.data.type === 'FX_RATES_UPDATED') {
           RATES = event.data.rates;
@@ -629,7 +638,6 @@
         }
       });
     }
-
   </script>
 </body>
 </html>
