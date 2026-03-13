@@ -16,19 +16,54 @@
   "prefer_related_applications": false,
   "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7",
   "related_applications": [],
-  "note_taking": {
-    "new_note_url": "/tulip-calculator/calculator.html"
-  },
+
   "scope_extensions": [
     { "origin": "https://zyofc99.github.io" }
   ],
+
   "edge_side_panel": {
     "preferred_width": 400
   },
+
+  "note_taking": {
+    "new_note_url": "/tulip-calculator/calculator.html"
+  },
+
   "handle_links": "preferred",
+
   "launch_handler": {
     "client_mode": ["focus-existing", "auto"]
   },
+
+  "✅ 新增 protocol_handlers": "讓 PWA 處理自訂協議",
+  "protocol_handlers": [
+    {
+      "protocol": "web+tulip",
+      "url": "/tulip-calculator/calculator.html?protocol=%s"
+    }
+  ],
+
+  "✅ 新增 file_handlers": "讓 PWA 可開啟 .csv 檔案（匯率資料）",
+  "file_handlers": [
+    {
+      "action": "/tulip-calculator/calculator.html",
+      "accept": {
+        "text/csv": [".csv"]
+      }
+    }
+  ],
+
+  "✅ 新增 share_target": "出現在系統分享選單",
+  "share_target": {
+    "action": "/tulip-calculator/calculator.html",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
+
   "icons": [
     {
       "src": "icon-192x192.png",
@@ -49,6 +84,7 @@
       "purpose": "maskable"
     }
   ],
+
   "screenshots": [
     {
       "src": "screenshot-1.jpg",
@@ -65,6 +101,7 @@
       "label": "鬱金香計算機 - 匯率換算畫面"
     }
   ],
+
   "shortcuts": [
     {
       "name": "開啟計算機",
