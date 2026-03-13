@@ -31,7 +31,7 @@
     },
     {
       "src": "icon-maskable-512x512.png",
-      "sizes": "512x512",
+      "sizes": "1024x1024",
       "type": "image/png",
       "purpose": "maskable"
     }
@@ -39,14 +39,14 @@
   "screenshots": [
     {
       "src": "screenshot-1.jpg",
-      "sizes": "968x2144",
+      "sizes": "1260x2800",
       "type": "image/jpeg",
       "form_factor": "narrow",
       "label": "鬱金香計算機 - 計算機畫面"
     },
     {
       "src": "screenshot-2.jpg",
-      "sizes": "968x2144",
+      "sizes": "1260x2800",
       "type": "image/jpeg",
       "form_factor": "narrow",
       "label": "鬱金香計算機 - 匯率換算畫面"
