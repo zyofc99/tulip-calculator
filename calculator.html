@@ -129,31 +129,43 @@
     .fx-rate-bar{
       background:linear-gradient(135deg,rgba(255,249,196,0.8),rgba(255,236,153,0.6));
       border:1.5px solid rgba(249,168,37,0.4);border-radius:12px;
-      padding:6px 10px;margin-bottom:8px;font-size:10px;color:#a0522d;
+      padding:5px 8px;margin-bottom:7px;font-size:9.5px;color:#a0522d;
       display:flex;justify-content:space-between;flex-wrap:wrap;gap:2px;
     }
     .fx-rate-bar span{font-weight:700;color:#e65100;}
-    .fx-rate-bar .rate-update{font-size:9px;color:#bbb;width:100%;text-align:right;}
+    .fx-rate-bar .rate-update{font-size:8.5px;color:#bbb;width:100%;text-align:right;}
     .fx-loading{text-align:center;font-size:11px;color:#e65100;animation:blink 1s ease-in-out infinite;}
     @keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}
-    .fx-pair-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;}
-    .fx-pair-btn{
-      padding:6px 4px;border-radius:12px;border:2px solid rgba(255,213,79,0.5);
-      background:rgba(255,249,196,0.5);color:#a0522d;
-      font-family:'Quicksand',sans-serif;font-size:11px;font-weight:700;
-      cursor:pointer;transition:all 0.2s;text-align:center;line-height:1.4;
+
+    /* ✅ 3欄 2列，每欄同幣別上下對齊 */
+    .fx-pair-grid{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:4px;
+      margin-bottom:7px;
     }
-    .fx-pair-btn .flag{font-size:15px;display:block;margin-bottom:1px;}
+    .fx-pair-btn{
+      padding:4px 2px;
+      border-radius:10px;
+      border:1.5px solid rgba(255,213,79,0.5);
+      background:rgba(255,249,196,0.5);color:#a0522d;
+      font-family:'Quicksand',sans-serif;
+      font-size:9.5px;font-weight:700;
+      cursor:pointer;transition:all 0.2s;
+      text-align:center;line-height:1.3;
+    }
+    .fx-pair-btn .flag{font-size:13px;display:block;margin-bottom:1px;}
     .fx-pair-btn.selected{
       background:linear-gradient(145deg,#f9a825,#e65100);
       color:#fffde7;border-color:#e65100;
-      box-shadow:0 3px 10px rgba(230,81,0,0.3);
+      box-shadow:0 2px 8px rgba(230,81,0,0.3);
     }
-    .fx-pair-btn:hover{transform:translateY(-2px);filter:brightness(1.05);}
+    .fx-pair-btn:hover{transform:translateY(-1px);filter:brightness(1.05);}
+
     .fx-display-box{
       background:linear-gradient(135deg,rgba(255,249,196,0.8),rgba(255,236,153,0.6));
       border:1.5px solid rgba(249,168,37,0.4);border-radius:14px;
-      padding:8px 12px;margin-bottom:4px;position:relative;overflow:hidden;
+      padding:7px 12px;margin-bottom:4px;position:relative;overflow:hidden;
     }
     .fx-display-box::before{content:'🌷';position:absolute;left:10px;top:8px;font-size:14px;opacity:0.35;}
     .fx-display-label{font-size:9px;color:#e65100;letter-spacing:2px;margin-bottom:2px;text-align:right;}
@@ -165,18 +177,18 @@
       box-shadow:0 2px 6px rgba(230,81,0,0.3);flex-shrink:0;
     }
     #fx-display-val{
-      font-size:34px;font-weight:700;color:#5d3a00;
+      font-size:32px;font-weight:700;color:#5d3a00;
       font-family:'Quicksand',sans-serif;
       direction:rtl; text-align:left;
       min-width:0; overflow:hidden; white-space:nowrap; text-overflow:clip; flex:1;
     }
-    .fx-arrow{text-align:center;font-size:16px;margin:2px 0;color:#e65100;
+    .fx-arrow{text-align:center;font-size:14px;margin:1px 0;color:#e65100;
       animation:bounce-arrow 1.5s ease-in-out infinite;}
     @keyframes bounce-arrow{0%,100%{transform:translateY(0);}50%{transform:translateY(3px);}}
     .fx-result-box{
       background:linear-gradient(135deg,rgba(230,81,0,0.07),rgba(249,168,37,0.12));
       border:1.5px solid rgba(249,168,37,0.5);border-radius:14px;
-      padding:8px 12px;margin-bottom:8px;position:relative;overflow:hidden;
+      padding:7px 12px;margin-bottom:7px;position:relative;overflow:hidden;
     }
     .fx-result-box::before{content:'🌷';position:absolute;right:10px;top:8px;font-size:14px;opacity:0.3;}
     .fx-result-label{font-size:9px;color:#e65100;letter-spacing:2px;margin-bottom:2px;text-align:right;}
@@ -187,30 +199,25 @@
       font-size:12px;font-weight:700;white-space:nowrap;
       box-shadow:0 2px 6px rgba(33,150,243,0.2);flex-shrink:0;
     }
-
-    /* ✅ 修正：換算結果可橫向拖拉捲動 */
-    #fx-result {
-      font-size:34px;font-weight:700;color:#5d3a00;
+    #fx-result{
+      font-size:32px;font-weight:700;color:#5d3a00;
       font-family:'Quicksand',sans-serif;
-      text-align:right;
-      white-space:nowrap;
-      min-width:0;
-      flex:1;
-      overflow-x:auto;
-      overflow-y:hidden;
+      text-align:right; white-space:nowrap;
+      min-width:0; flex:1;
+      overflow-x:auto; overflow-y:hidden;
       text-overflow:clip;
       -webkit-overflow-scrolling:touch;
       cursor:grab;
-      scrollbar-width:none;        /* Firefox 隱藏捲軸 */
-      -ms-overflow-style:none;     /* IE 隱藏捲軸 */
-      direction:rtl;               /* 預設顯示最右側（最新數字） */
+      scrollbar-width:none;
+      -ms-overflow-style:none;
+      direction:rtl;
     }
-    #fx-result::-webkit-scrollbar { display:none; } /* Chrome/Safari 隱藏捲軸 */
-    #fx-result:active { cursor:grabbing; }
+    #fx-result::-webkit-scrollbar{display:none;}
+    #fx-result:active{cursor:grabbing;}
 
     .fx-numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;}
     .fx-key{
-      padding:12px 4px;font-family:'Quicksand',sans-serif;
+      padding:11px 4px;font-family:'Quicksand',sans-serif;
       font-size:14px;font-weight:700;border:none;cursor:pointer;
       border-radius:11px;transition:all 0.15s ease;
       position:relative;overflow:hidden;
@@ -297,6 +304,7 @@
       <button class="tab-btn" id="tab-fx" onclick="switchTab('fx')">💱 匯率換算</button>
     </div>
 
+    <!-- 計算機面板 -->
     <div id="calc-panel">
       <div id="display-wrapper">
         <div class="display-label">輸入算式</div>
@@ -327,24 +335,34 @@
       </div>
     </div>
 
+    <!-- 匯率換算面板 -->
     <div id="fx-panel">
       <div class="fx-rate-bar" id="fx-rate-bar">
         <div class="fx-loading" style="width:100%;text-align:center;">🌷 匯率載入中...</div>
       </div>
+
+      <!-- ✅ 順序：第1欄日幣、第2欄美元、第3欄人民幣，上排→下排← -->
       <div class="fx-pair-grid">
         <button class="fx-pair-btn selected" onclick="selectPair('TWD','JPY')" id="btn-twd-jpy">
-          <span class="flag">🇹🇼→🇯🇵</span>台幣 → 日幣
-        </button>
-        <button class="fx-pair-btn" onclick="selectPair('JPY','TWD')" id="btn-jpy-twd">
-          <span class="flag">🇯🇵→🇹🇼</span>日幣 → 台幣
+          <span class="flag">🇹🇼→🇯🇵</span>台幣→日幣
         </button>
         <button class="fx-pair-btn" onclick="selectPair('TWD','USD')" id="btn-twd-usd">
-          <span class="flag">🇹🇼→🇺🇸</span>台幣 → 美元
+          <span class="flag">🇹🇼→🇺🇸</span>台幣→美元
+        </button>
+        <button class="fx-pair-btn" onclick="selectPair('TWD','CNY')" id="btn-twd-cny">
+          <span class="flag">🇹🇼→🇨🇳</span>台幣→人民幣
+        </button>
+        <button class="fx-pair-btn" onclick="selectPair('JPY','TWD')" id="btn-jpy-twd">
+          <span class="flag">🇯🇵→🇹🇼</span>日幣→台幣
         </button>
         <button class="fx-pair-btn" onclick="selectPair('USD','TWD')" id="btn-usd-twd">
-          <span class="flag">🇺🇸→🇹🇼</span>美元 → 台幣
+          <span class="flag">🇺🇸→🇹🇼</span>美元→台幣
+        </button>
+        <button class="fx-pair-btn" onclick="selectPair('CNY','TWD')" id="btn-cny-twd">
+          <span class="flag">🇨🇳→🇹🇼</span>人民幣→台幣
         </button>
       </div>
+
       <div class="fx-display-box">
         <div class="fx-display-label">✦ 輸入金額 ✦</div>
         <div class="fx-display-row">
@@ -434,11 +452,11 @@
       if (!res.ok) throw new Error('Fawaz HTTP ' + res.status);
       const data = await res.json();
       if (!data.usd) throw new Error('Fawaz 無 usd');
-      const usdTwd = data.usd['twd'], usdJpy = data.usd['jpy'];
-      if (!usdTwd || !usdJpy) throw new Error('Fawaz 缺少幣別');
+      const usdTwd = data.usd['twd'], usdJpy = data.usd['jpy'], usdCny = data.usd['cny'];
+      if (!usdTwd || !usdJpy || !usdCny) throw new Error('Fawaz 缺少幣別');
       const today = new Date();
       const date = `${today.getFullYear()}/${String(today.getMonth()+1).padStart(2,'0')}/${String(today.getDate()).padStart(2,'0')}`;
-      return { usdTwd, usdJpy, date };
+      return { usdTwd, usdJpy, usdCny, date };
     }
     async function fetchFromFawazMirror() {
       const today = new Date();
@@ -447,17 +465,17 @@
       if (!res.ok) throw new Error('FawazMirror HTTP ' + res.status);
       const data = await res.json();
       if (!data.usd) throw new Error('FawazMirror 無 usd');
-      const usdTwd = data.usd['twd'], usdJpy = data.usd['jpy'];
-      if (!usdTwd || !usdJpy) throw new Error('FawazMirror 缺少幣別');
+      const usdTwd = data.usd['twd'], usdJpy = data.usd['jpy'], usdCny = data.usd['cny'];
+      if (!usdTwd || !usdJpy || !usdCny) throw new Error('FawazMirror 缺少幣別');
       const date = `${today.getFullYear()}/${String(today.getMonth()+1).padStart(2,'0')}/${String(today.getDate()).padStart(2,'0')}`;
-      return { usdTwd, usdJpy, date };
+      return { usdTwd, usdJpy, usdCny, date };
     }
     async function fetchFromFrankfurter() {
-      const res = await fetchWithTimeout('https://api.frankfurter.app/latest?from=USD&to=TWD,JPY',{ cache: 'no-store' }, 8000);
+      const res = await fetchWithTimeout('https://api.frankfurter.app/latest?from=USD&to=TWD,JPY,CNY',{ cache: 'no-store' }, 8000);
       if (!res.ok) throw new Error('Frankfurter HTTP ' + res.status);
       const data = await res.json();
       if (!data.rates) throw new Error('Frankfurter 無 rates');
-      return { usdTwd: data.rates['TWD'], usdJpy: data.rates['JPY'], date: data.date };
+      return { usdTwd: data.rates['TWD'], usdJpy: data.rates['JPY'], usdCny: data.rates['CNY'], date: data.date };
     }
     async function fetchFromOpenER() {
       const res = await fetchWithTimeout('https://open.er-api.com/v6/latest/USD',{ cache: 'no-store' }, 8000);
@@ -467,14 +485,14 @@
       const utcDate = new Date(data.time_last_update_utc);
       const twDate  = new Date(utcDate.getTime() + 8 * 60 * 60 * 1000);
       const date = `${twDate.getFullYear()}/${String(twDate.getMonth()+1).padStart(2,'0')}/${String(twDate.getDate()).padStart(2,'0')}`;
-      return { usdTwd: data.rates['TWD'], usdJpy: data.rates['JPY'], date };
+      return { usdTwd: data.rates['TWD'], usdJpy: data.rates['JPY'], usdCny: data.rates['CNY'], date };
     }
     async function fetchFromExchangeRate() {
       const res = await fetchWithTimeout('https://api.exchangerate-api.com/v4/latest/USD',{ cache: 'no-store' }, 8000);
       if (!res.ok) throw new Error('ExchangeRate HTTP ' + res.status);
       const data = await res.json();
       if (!data.rates) throw new Error('ExchangeRate 無 rates');
-      return { usdTwd: data.rates['TWD'], usdJpy: data.rates['JPY'], date: data.date };
+      return { usdTwd: data.rates['TWD'], usdJpy: data.rates['JPY'], usdCny: data.rates['CNY'], date: data.date };
     }
 
     async function fetchRates() {
@@ -497,13 +515,19 @@
         }
       }
       if (result) {
-        const { usdTwd, usdJpy, date } = result;
+        const { usdTwd, usdJpy, usdCny, date } = result;
         RATES['USD_TWD'] = usdTwd;
         RATES['TWD_USD'] = 1 / usdTwd;
         RATES['USD_JPY'] = usdJpy;
         RATES['JPY_USD'] = 1 / usdJpy;
         RATES['TWD_JPY'] = usdJpy / usdTwd;
         RATES['JPY_TWD'] = usdTwd / usdJpy;
+        RATES['USD_CNY'] = usdCny;
+        RATES['CNY_USD'] = 1 / usdCny;
+        RATES['TWD_CNY'] = usdCny / usdTwd;
+        RATES['CNY_TWD'] = usdTwd / usdCny;
+        RATES['JPY_CNY'] = usdCny / usdJpy;
+        RATES['CNY_JPY'] = usdJpy / usdCny;
         try {
           localStorage.setItem('lastRates', JSON.stringify(RATES));
           localStorage.setItem('lastRateDate', String(date));
@@ -513,6 +537,7 @@
           <div>🇺🇸 1 USD = <span>${usdTwd.toFixed(2)}</span> TWD</div>
           <div>🇹🇼 1 TWD = <span>${RATES['TWD_JPY'].toFixed(4)}</span> JPY</div>
           <div>🇯🇵 1 JPY = <span>${RATES['JPY_TWD'].toFixed(4)}</span> TWD</div>
+          <div>🇨🇳 1 CNY = <span>${RATES['CNY_TWD'].toFixed(4)}</span> TWD</div>
           <div class="rate-update">📅 即時匯率 ${dateStr} ✅</div>
         `;
       } else {
@@ -528,14 +553,23 @@
             <div>🇺🇸 1 USD = <span>${(RATES['USD_TWD']||0).toFixed(2)}</span> TWD</div>
             <div>🇹🇼 1 TWD = <span>${(RATES['TWD_JPY']||0).toFixed(4)}</span> JPY</div>
             <div>🇯🇵 1 JPY = <span>${(RATES['JPY_TWD']||0).toFixed(4)}</span> TWD</div>
+            <div>🇨🇳 1 CNY = <span>${(RATES['CNY_TWD']||0).toFixed(4)}</span> TWD</div>
             <div class="rate-update">📦 上次快取匯率 ${cachedDate} ⚠️</div>
           `;
         } else {
-          RATES = { 'TWD_JPY':4.987,'JPY_TWD':0.2005,'TWD_USD':0.03143,'USD_TWD':31.81,'USD_JPY':154.2,'JPY_USD':0.00648 };
+          RATES = {
+            'TWD_JPY':4.987,'JPY_TWD':0.2005,
+            'TWD_USD':0.03143,'USD_TWD':31.81,
+            'USD_JPY':154.2,'JPY_USD':0.00648,
+            'TWD_CNY':0.2198,'CNY_TWD':4.549,
+            'USD_CNY':7.24,'CNY_USD':0.1381,
+            'JPY_CNY':0.04695,'CNY_JPY':21.30
+          };
           bar.innerHTML = `
             <div>🇺🇸 1 USD = <span>31.81</span> TWD</div>
             <div>🇹🇼 1 TWD = <span>4.987</span> JPY</div>
             <div>🇯🇵 1 JPY = <span>0.2005</span> TWD</div>
+            <div>🇨🇳 1 CNY = <span>4.549</span> TWD</div>
             <div class="rate-update">⚠️ 網路異常，使用備用匯率</div>
           `;
         }
@@ -568,8 +602,6 @@
     function updateFxDisplay() {
       document.getElementById('fx-display-val').textContent = fxExpr || '0';
     }
-
-    /* ✅ 修正：fxConvert 更新後自動捲到最右側顯示最新數字 */
     function fxConvert() {
       const el = document.getElementById('fx-result');
       const amt = parseFloat(fxExpr);
@@ -580,9 +612,9 @@
       let fmt;
       if      (fxTo === 'JPY') fmt = Math.round(result).toLocaleString() + ' ¥';
       else if (fxTo === 'USD') fmt = '$ ' + result.toFixed(2);
+      else if (fxTo === 'CNY') fmt = '¥ ' + result.toFixed(2);
       else                     fmt = 'NT$ ' + result.toFixed(2);
       el.textContent = fmt;
-      // ✅ 自動捲到最右側（direction:rtl 已處理，這裡補保險）
       el.scrollLeft = el.scrollWidth;
     }
 
@@ -620,7 +652,6 @@
           .catch(err => console.log('SW 註冊失敗:', err));
       });
 
-      /* ✅ 接收 Service Worker 背景更新的匯率 */
       navigator.serviceWorker.addEventListener('message', event => {
         if (event.data && event.data.type === 'FX_RATES_UPDATED') {
           RATES = event.data.rates;
@@ -631,6 +662,7 @@
               <div>🇺🇸 1 USD = <span>${RATES['USD_TWD'].toFixed(2)}</span> TWD</div>
               <div>🇹🇼 1 TWD = <span>${RATES['TWD_JPY'].toFixed(4)}</span> JPY</div>
               <div>🇯🇵 1 JPY = <span>${RATES['JPY_TWD'].toFixed(4)}</span> TWD</div>
+              <div>🇨🇳 1 CNY = <span>${RATES['CNY_TWD'].toFixed(4)}</span> TWD</div>
               <div class="rate-update">🔄 背景自動更新 ${event.data.date} ✅</div>
             `;
             fxConvert();
