@@ -1,5 +1,5 @@
-/* 🌷 鬱金香計算機 Service Worker v5 */
-const CACHE_NAME = 'tulip-calc-v5';  // ← 每次改版就把數字+1
+/* 🌷 鬱金香計算機 Service Worker v8 */
+const CACHE_NAME = 'tulip-calc-v8';  // ← 每次改版就把數字+1
 
 const PRECACHE_URLS = [
   '/tulip-calculator/',
