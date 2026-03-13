@@ -15,7 +15,6 @@
       font-family: 'Quicksand', 'Noto Sans TC', sans-serif;
       display: flex; justify-content: center; align-items: center;
       min-height: 100vh;
-      /* ✅ 修復1：允許body捲動，避免內容被截斷 */
       overflow-y: auto;
       background: linear-gradient(180deg,
         #1a3a5c 0%, #2d6a8a 20%, #4a9aba 35%,
@@ -64,7 +63,6 @@
       background:rgba(255,253,231,0.90);
       backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
       border:1.5px solid rgba(255,235,100,0.7); border-radius:26px;
-      /* ✅ 修復2：縮小padding，確保內容不超出螢幕 */
       padding:16px 14px 14px; width:350px;
       box-shadow:0 8px 40px rgba(180,140,0,0.18),0 2px 8px rgba(255,255,255,0.5) inset;
     }
@@ -133,7 +131,6 @@
     .fx-rate-bar{
       background:linear-gradient(135deg,rgba(255,249,196,0.8),rgba(255,236,153,0.6));
       border:1.5px solid rgba(249,168,37,0.4);border-radius:12px;
-      /* ✅ 修復3：縮小padding節省空間 */
       padding:6px 10px;margin-bottom:8px;font-size:10px;color:#a0522d;
       display:flex;justify-content:space-between;flex-wrap:wrap;gap:2px;
     }
@@ -143,7 +140,6 @@
     @keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}
     .fx-pair-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;}
     .fx-pair-btn{
-      /* ✅ 修復4：縮小按鈕padding */
       padding:6px 4px;border-radius:12px;border:2px solid rgba(255,213,79,0.5);
       background:rgba(255,249,196,0.5);color:#a0522d;
       font-family:'Quicksand',sans-serif;font-size:11px;font-weight:700;
@@ -159,7 +155,6 @@
     .fx-display-box{
       background:linear-gradient(135deg,rgba(255,249,196,0.8),rgba(255,236,153,0.6));
       border:1.5px solid rgba(249,168,37,0.4);border-radius:14px;
-      /* ✅ 修復5：縮小padding */
       padding:8px 12px;margin-bottom:4px;position:relative;overflow:hidden;
     }
     .fx-display-box::before{content:'🌷';position:absolute;left:10px;top:8px;font-size:14px;opacity:0.35;}
@@ -171,11 +166,9 @@
       font-size:12px;font-weight:700;white-space:nowrap;
       box-shadow:0 2px 6px rgba(230,81,0,0.3);flex-shrink:0;
     }
-    /* ✅ 修復6：核心修復 - 顯示最後輸入的數字 */
     #fx-display-val{
       font-size:34px;font-weight:700;color:#5d3a00;
       font-family:'Quicksand',sans-serif;
-      /* 關鍵：讓文字從右邊開始，永遠顯示最新輸入 */
       direction: rtl;
       text-align:left;
       min-width:0;
@@ -190,7 +183,6 @@
     .fx-result-box{
       background:linear-gradient(135deg,rgba(230,81,0,0.07),rgba(249,168,37,0.12));
       border:1.5px solid rgba(249,168,37,0.5);border-radius:14px;
-      /* ✅ 修復7：縮小padding */
       padding:8px 12px;margin-bottom:8px;position:relative;overflow:hidden;
     }
     .fx-result-box::before{content:'🌷';position:absolute;right:10px;top:8px;font-size:14px;opacity:0.3;}
@@ -208,7 +200,6 @@
       min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
       flex:1;
     }
-    /* ✅ 修復8：數字鍵盤縮小padding */
     .fx-numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;}
     .fx-key{
       padding:12px 4px;font-family:'Quicksand',sans-serif;
@@ -230,7 +221,6 @@
     .fx-clr{background:linear-gradient(145deg,#ffebee,#ffcdd2);color:#b71c1c;box-shadow:0 3px 8px rgba(244,67,54,0.2);border:1px solid rgba(239,154,154,0.5);}
     .fx-dot{background:linear-gradient(145deg,#fffde7,#fff9c4);color:#5d3a00;box-shadow:0 3px 8px rgba(249,168,37,0.2);border:1px solid rgba(255,224,130,0.6);}
     .fx-full{grid-column:span 3;}
-    /* ✅ 修復9：縮小footer間距 */
     .footer-deco{text-align:center;margin-top:8px;font-size:16px;letter-spacing:5px;opacity:0.6;}
     .petal{position:fixed;pointer-events:none;z-index:5;animation:petal-fall linear infinite;opacity:0.85;font-size:14px;}
     @keyframes petal-fall {
@@ -423,35 +413,64 @@
       } catch { display.value='錯誤'; }
     }
 
-    /* ══ 即時匯率 ══ */
+    /* ══ 即時匯率（多 API 備援）══ */
     let RATES = {};
     let fxFrom = 'TWD', fxTo = 'JPY', fxExpr = '';
 
+    async function fetchFromFrankfurter() {
+      const res  = await fetch('https://api.frankfurter.app/latest?from=USD&to=TWD,JPY', { cache: 'no-store' });
+      const data = await res.json();
+      if (!data.rates) throw new Error('Frankfurter 失敗');
+      return { usdTwd: data.rates['TWD'], usdJpy: data.rates['JPY'], date: data.date };
+    }
+
+    async function fetchFromOpenER() {
+      const res  = await fetch('https://open.er-api.com/v6/latest/USD', { cache: 'no-store' });
+      const data = await res.json();
+      if (data.result !== 'success') throw new Error('OpenER 失敗');
+      const utcDate = new Date(data.time_last_update_utc);
+      const twDate  = new Date(utcDate.getTime() + 8*60*60*1000);
+      const date = `${twDate.getFullYear()}/${String(twDate.getMonth()+1).padStart(2,'0')}/${String(twDate.getDate()).padStart(2,'0')}`;
+      return { usdTwd: data.rates['TWD'], usdJpy: data.rates['JPY'], date };
+    }
+
     async function fetchRates() {
       const bar = document.getElementById('fx-rate-bar');
-      try {
-        const res  = await fetch('https://open.er-api.com/v6/latest/USD', { cache: 'no-store' });
-        const data = await res.json();
-        if (data.result !== 'success') throw new Error('API 失敗');
-        const r = data.rates;
-        const usdTwd = r['TWD'], usdJpy = r['JPY'];
+      let result = null;
+
+      // 依序嘗試多個 API
+      const apis = [fetchFromFrankfurter, fetchFromOpenER];
+      for (const apiFn of apis) {
+        try {
+          result = await apiFn();
+          break; // 成功就跳出
+        } catch(e) {
+          console.warn('API 嘗試失敗:', e.message);
+        }
+      }
+
+      if (result) {
+        const { usdTwd, usdJpy, date } = result;
         RATES['USD_TWD'] = usdTwd;
         RATES['TWD_USD'] = 1 / usdTwd;
         RATES['USD_JPY'] = usdJpy;
         RATES['JPY_USD'] = 1 / usdJpy;
         RATES['TWD_JPY'] = usdJpy / usdTwd;
         RATES['JPY_TWD'] = usdTwd / usdJpy;
-        const utcDate = new Date(data.time_last_update_utc);
-        const twDate  = new Date(utcDate.getTime() + 8*60*60*1000);
-        const rateDate = `${twDate.getFullYear()}/${String(twDate.getMonth()+1).padStart(2,'0')}/${String(twDate.getDate()).padStart(2,'0')}`;
+
+        // 格式化日期
+        const dateStr = typeof date === 'string' && date.includes('-')
+          ? date.replace(/-/g, '/')
+          : date;
+
         bar.innerHTML = `
           <div>🇺🇸 1 USD = <span>${usdTwd.toFixed(2)}</span> TWD</div>
           <div>🇹🇼 1 TWD = <span>${RATES['TWD_JPY'].toFixed(4)}</span> JPY</div>
           <div>🇯🇵 1 JPY = <span>${RATES['JPY_TWD'].toFixed(4)}</span> TWD</div>
-          <div class="rate-update">📅 即時匯率 ${rateDate} ✅</div>
+          <div class="rate-update">📅 即時匯率 ${dateStr} ✅</div>
         `;
-        fxConvert();
-      } catch(err) {
+      } else {
+        // 所有 API 都失敗，使用備用匯率
         RATES = { 'TWD_JPY':4.987,'JPY_TWD':0.2005,'TWD_USD':0.03143,'USD_TWD':31.81 };
         bar.innerHTML = `
           <div>🇺🇸 1 USD = <span>31.81</span> TWD</div>
@@ -460,6 +479,7 @@
           <div class="rate-update">⚠️ 網路異常，使用備用匯率</div>
         `;
       }
+      fxConvert();
     }
     fetchRates();
 
