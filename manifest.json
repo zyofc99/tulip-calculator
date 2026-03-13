@@ -6,7 +6,15 @@
   "start_url": "/tulip-calculator/calculator.html",
   "scope": "/tulip-calculator/",
   "display": "standalone",
-  "display_override": ["tabbed", "window-controls-overlay", "standalone"],
+  "display_override": ["tabbed", "standalone"],
+  "tab_strip": {
+    "home_tab": {
+      "url": "/tulip-calculator/calculator.html"
+    },
+    "new_tab_button": {
+      "url": "/tulip-calculator/calculator.html"
+    }
+  },
   "orientation": "portrait",
   "background_color": "#1a3a5c",
   "theme_color": "#f9a825",
